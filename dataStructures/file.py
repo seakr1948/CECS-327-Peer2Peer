@@ -19,9 +19,9 @@ class file_:
         
         meta_data = {
             "relative_path": self.relative_path,
-            "data_modified": self.date_modified
+            "data_modified": self.date_modified,
             "name": self.name,
-            "origin_node": self.origin_node
+            "origin_node": self.origin_node,
             "check_sum": self.check_sum
         }
 
