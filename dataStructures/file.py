@@ -2,27 +2,28 @@ import datetime
 import uuid
 import json
 
-class file_:
+from os import path
+import fileSystemHelpers.checksum as checksum
+
+class File:
     
-    def __init__(self,
-        relative_path: str, date_modified: datetime.datetime, 
-        name: str, origin_node: uuid.UUID, check_sum: int
-        ):
+    def __init__(self, relative_path: str, origin_node: uuid.UUID, encoder: list):
 
         self.relative_path = relative_path
-        self.date_modified = date_modified
-        self.name = name
+        self.complete_path = path.abspath(self.relative_path)
+        self.date_modified = checksum.get_time_stamp(self.complete_path)
+        self.name = path.basename(self.complete_path)
         self.origin_node = origin_node
-        self.check_sum = check_sum
+        self.check_sum = checksum.check_sum(self.relative_path, self.complete_path, encoder)
         
-    def to_json(self):
+    def to_dict(self):
         
         meta_data = {
             "relative_path": self.relative_path,
-            "data_modified": self.date_modified,
+            "data_modified": str(self.date_modified),
             "name": self.name,
-            "origin_node": self.origin_node,
+            "origin_node": str(self.origin_node),
             "check_sum": self.check_sum
         }
 
-        return json.dumps(meta_data)
+        return meta_data

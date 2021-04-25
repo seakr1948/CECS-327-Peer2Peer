@@ -1,0 +1,16 @@
+[
+    {
+        "check_sum": 23497, 
+        "data_modified": "2021-04-24 21:51:06", 
+        "name": "data.txt", 
+        "origin_node": "f6d3a213-8929-4c12-be20-459faf520146", 
+        "relative_path": "./test_folder/data.txt"
+    }, 
+    {
+        "check_sum": 24248, 
+        "data_modified": "2021-04-24 22:03:52", 
+        "name": "data2.txt", 
+        "origin_node": "f6d3a213-8929-4c12-be20-459faf520146", 
+        "relative_path": "./test_folder/data2.txt"
+    }
+]

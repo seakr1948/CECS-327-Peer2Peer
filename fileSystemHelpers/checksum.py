@@ -6,7 +6,7 @@ from datetime import datetime
 import sys
 
 
-def check_sum(complete_path: str, encoder: list):
+def check_sum(relative_path: str, complete_path: str, encoder: list):
     """
     Computes a check sum of a file including it's contents, filename, modification timestamp, and complete path
     Args:
@@ -29,7 +29,7 @@ def check_sum(complete_path: str, encoder: list):
     check_sum_contents = file.readlines()
     check_sum_contents.append(name_of_file)
     check_sum_contents.append(str(timestamp))
-    check_sum_contents.append(complete_path)
+    check_sum_contents.append(relative_path)
 
     # Get the length of the encoder
     length_of_encoder = len(encoder)
