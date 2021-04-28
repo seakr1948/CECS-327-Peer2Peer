@@ -1,15 +1,26 @@
 import socket
 import time
 
-serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-serversocket.bind(('', 8087))
-serversocket.listen(5)
+host = "0.0.0.0"
+port = 5000
 
-connection, address = serversocket.accept()
+print (socket.gethostname())
 
-b = connection.recv(1)
-time.sleep(0.1)
-serversocket.close()
-connection.shutdown(socket.SHUT_WR)
-connection.close()
-print(b)
+mysocket = socket.socket()
+mysocket.bind((host, port))
+
+mysocket.listen(1)
+
+conn, addr = mysocket.accept()
+print("Connection from: " + str(addr))
+while True:
+    data = conn.recv(1024).decode()
+    if not data:
+        break
+    print("from connected user: " + str(data))
+
+    data = str(data).upper()
+    print("sending: " + str(data))
+    conn.send(data.encode())
+
+conn.close()
