@@ -10,5 +10,5 @@ if __name__ == "__main__":
 
     test_node = node.node(relative_path, ip, "5555")
 
-    test_node.test_uuid()
+    test_node.init_network()
     test_node.init_meta_file()

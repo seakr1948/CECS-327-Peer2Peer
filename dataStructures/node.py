@@ -24,6 +24,16 @@ class node:
 
         self.uuid = uuid.uuid4()
         self.peers = {}
+        
+        try:
+            self.ignore_file_names = []
+            with open(path.abspath(self.folder_complete_path + '/' + '.ignore')) as f:
+                for file_name in f:
+                    self.ignore_file_names.append(file_name.strip('\n'))
+        except:
+            print("No ignored files")
+        
+        print(self.ignore_file_names)
 
     def join_network(self, peers: dict, uuid_: uuid.UUID):
 
@@ -41,16 +51,22 @@ class node:
         return peers_minus_joining_node, joining_node_uuid
     
     def init_meta_file(self):
-        files = []
+        file_structure = []
 
         for (dirpath, dirnames, filenames) in walk(self.folder_complete_path):
-            files.extend(filenames)
+            file_structure.append((dirpath, filenames))
 
-        file_objects = [
-            file_.File(self.folder_relative_path + "/"+file_name, self.uuid, self.encoder)
-            for file_name in files
-            ]
-
+        file_objects = []
+        for folder in file_structure:
+            folder_files = folder[1]
+            for file in folder_files:
+                if file not in self.ignore_file_names:
+                    complete_folder_path = folder[0]
+                    paths = [self.folder_relative_path, path.relpath(complete_folder_path, self.folder_relative_path), file]
+                    relative_path_of_file = path.join(*paths)
+                    print(relative_path_of_file)
+                    file_objects.append(file_.File(relative_path_of_file, self.uuid, self.encoder))
+            
         json_file = open(self.folder_complete_path + "/meta.json", 'w')
 
         list_of_meta_data = []
