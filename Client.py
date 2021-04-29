@@ -1,4 +1,5 @@
 import socket
+import json
 
 host = "DESKTOP-Q6J99TN"
 port = 5000
@@ -16,3 +17,8 @@ while message != 'q':
     message = input(" -> ")
 
 mysocket.close()
+
+#take a JSON object and serializes it into a string which will be sent to the server
+def sendJson(jsonObj):
+    jsonString = json.dumps(jsonObj) #serializing/marshalling the json data into a python string
+    mysocket.sendall(jsonString)
