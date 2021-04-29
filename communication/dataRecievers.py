@@ -11,7 +11,7 @@ def send_json(host, port, jsonObj):
 
         # Deserialize JSON and sent it to the server
         jsonString = json.dumps(jsonObj)
-        socket.sendall(jsonString)
+        temp_socket.sendall(jsonString)
 
         print("Sent this : " + str(jsonObj))
     
