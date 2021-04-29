@@ -1,4 +1,5 @@
 import json
+from socket import socket
 import uuid
 import dataStructures.file as file_
 import communication.dataRecievers as data_recievers
@@ -34,6 +35,7 @@ class Node:
 
         self.uuid = uuid.uuid4()
         self.peers = {}
+        self.set_up_request_socket()
 
         try:
             self.ignore_file_names = []
@@ -124,15 +126,24 @@ class Node:
         except:
             print("meta does not exist")
 
-    def start_a_thread(self, function, args_= ()):
+    def start_a_thread(self, function, args_=()):
         listen_for_request_thread = threading.Thread(target=function, args=args_)
         listen_for_request_thread.start()
 
-    def listen_for_request(self):
-        print(data_recievers.receive_json(self.ip, self.request_port))
+    def dispatch_request(self):
+        self.request_socket.listen
+        connection, address = self.request_socket.accept()
+        request = data_recievers.receive_json(connection, address)
+        connection.close()
+        print(request)
 
     def get_node_meta_data(self):
         return {"UUID": self.uuid(), "IP": self.ip, "REQUEST_PORT": self.request_port}
+
+    def set_up_request_socket(self):
+        self.request_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.request_socket.bind((self.ip, self.request_port))
+        self.start_a_thread(self.dispatch_request)
 
     def test_uuid(self):
         self.uuid = uuid.uuid4()

@@ -5,7 +5,7 @@ import json
 host = "0.0.0.0"
 port = 5000
 
-print (socket.gethostname())
+print(socket.gethostname())
 
 mysocket = socket.socket()
 mysocket.bind((host, port))
@@ -26,8 +26,8 @@ while True:
 
 conn.close()
 
-#code to deserialize JSON data from client. Will return a JSON object
+# code to deserialize JSON data from client. Will return a JSON object
 def recvJson():
     recievedJson = data
-    jsonObj = json.loads(recievedJson) #deserializing JSON data sent from client
+    jsonObj = json.loads(recievedJson)  # deserializing JSON data sent from client
     return jsonObj

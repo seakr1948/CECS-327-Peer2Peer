@@ -1,3 +1,1 @@
-REQUEST = {
-    "JOIN" : Node.accept_join_request
-}
+REQUEST = {"JOIN": Node.accept_join_request}

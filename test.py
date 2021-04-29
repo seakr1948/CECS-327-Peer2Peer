@@ -14,12 +14,14 @@ if __name__ == "__main__":
 
     test_node = node.Node(relative_path, ip, port_number)
 
-    if new_network.upper() == 'Y':
+    if new_network.upper() == "Y":
         test_node.init_network()
         test_node.start_a_thread(test_node.listen_for_request)
     else:
         network_key = input("Enter network key: ")
         host_ip = input("Enter ip to join: ")
-        test_node.start_a_thread(test_node.request_join_network, args_= (host_ip, port_number, ip))
+        test_node.start_a_thread(
+            test_node.request_join_network, args_=(host_ip, port_number, ip)
+        )
 
     test_node.init_meta_file()

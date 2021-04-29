@@ -9,7 +9,7 @@ mysocket.connect((host, port))
 
 message = input(" -> ")
 
-while message != 'q':
+while message != "q":
     mysocket.send(message.encode())
     data = mysocket.recv(1024).decode()
 
@@ -18,7 +18,9 @@ while message != 'q':
 
 mysocket.close()
 
-#take a JSON object and serializes it into a string which will be sent to the server
+# take a JSON object and serializes it into a string which will be sent to the server
 def sendJson(jsonObj):
-    jsonString = json.dumps(jsonObj) #serializing/marshalling the json data into a python string
+    jsonString = json.dumps(
+        jsonObj
+    )  # serializing/marshalling the json data into a python string
     mysocket.sendall(jsonString)
