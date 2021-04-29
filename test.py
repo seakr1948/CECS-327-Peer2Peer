@@ -8,6 +8,8 @@ if __name__ == "__main__":
     port_number = int(input("Port Number: "))
     ip = socket.gethostbyname(socket.gethostname())
 
+    print("IP: " + ip)
+
     relative_path = "./test_folder"
 
     test_node = node.Node(relative_path, ip, port_number)
