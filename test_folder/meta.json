@@ -1,0 +1,23 @@
+[
+    {
+        "check_sum": 24282, 
+        "data_modified": "2021-04-29 18:45:24", 
+        "name": "data.txt", 
+        "origin_node": "478e3572-afce-4c6e-a920-ff50297a63fa", 
+        "relative_path": "./test_folder\\.\\data.txt"
+    }, 
+    {
+        "check_sum": 25545, 
+        "data_modified": "2021-04-29 18:45:24", 
+        "name": "data2.txt", 
+        "origin_node": "478e3572-afce-4c6e-a920-ff50297a63fa", 
+        "relative_path": "./test_folder\\.\\data2.txt"
+    }, 
+    {
+        "check_sum": 281035, 
+        "data_modified": "2021-04-29 18:45:24", 
+        "name": "meta.json", 
+        "origin_node": "478e3572-afce-4c6e-a920-ff50297a63fa", 
+        "relative_path": "./test_folder\\.\\meta.json"
+    }
+]

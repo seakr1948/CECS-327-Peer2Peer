@@ -1,1 +1,6 @@
+<<<<<<< HEAD
 image.jpg
+=======
+*.pyc
+*.ignore
+>>>>>>> f8fdc8da875a4922548430c24dd8a0ea3539bc37

@@ -1,5 +1,6 @@
 import socket
 import time
+import json
 
 host = "0.0.0.0"
 port = 5000
@@ -27,3 +28,10 @@ with open('image.jpg', 'wb') as file:
     file.close()
     print("Server stopping")
     conn.close()
+conn.close()
+
+#code to deserialize JSON data from client. Will return a JSON object
+def recvJson():
+    recievedJson = data
+    jsonObj = json.loads(recievedJson) #deserializing JSON data sent from client
+    return jsonObj
