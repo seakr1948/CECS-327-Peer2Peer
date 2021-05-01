@@ -21,25 +21,28 @@ class Node:
         network_key=9999,
     ):
 
+        # Standard node data
         self.folder_relative_path = shared_folder_relative_path
         self.folder_complete_path = path.abspath(self.folder_relative_path)
         self.ip = ip
         self.server_port = server_port
         self.client_port = client_port
         self.encoder = [9, 4, 3, 6]
+        self.network_key = network_key
         
         # Work buffer for the client
         self.work_buffer = LifoQueue()
         self.client = Client(self)
         self.server = Server(self)
         
-
     def __str__(self):
         return str(self.uuid) + "\n" + str(self.peers)
 
     def init_network(self):
 
+        # Init a uuid for this node
         self.uuid = uuid.uuid4()
+        # Starts a dict of peers
         self.peers = {}
 
         try:
@@ -113,25 +116,37 @@ class Node:
 
     def get_node_meta_data(self):
         return {"UUID": self.uuid(), "IP": self.ip, "REQUEST_PORT": self.request_port}
-    
 
+    def accept_join_request(self, data):
+        # If the network key matches
+        if data["key"] == self.network_key:
+            print("Adding node to peers")
+            new_node_uuid = uuid.uuid4()
+            self.peers.update({new_node_uuid: data})
+
+            return True
+        
+        return False
+            
+        
 class Client:
 
-    def __init__(self, node_data: Node):
-        self.node_data = node_data
+    def __init__(self, node: Node):
+        self.node = node
         #self.set_up_client_socket()
 
     def set_up_client_socket(self):
         self.client_socket = socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.bind((self.node_data.ip, self.node_data.client_port))
+        self.client_socket.bind((self.node.ip, self.node.client_port))
 
     def request_join_network(self, ip, port, network_key: int):
+        # Create join request
         request = {
             "type": "JOIN",
-            "params": {
+            "data": {
                 "key": network_key,
-                "ip": self.ip,
-                "Request_port": self.request_port,
+                "ip": self.node.ip,
+                "Request_port": self.node.server_port,
             },
         }
 
@@ -154,26 +169,61 @@ class Client:
         
         return response
     
-    def join_network():
-        pass
-
+    def wait_for_work(self):
+        # While true block for work
+        while True:
+            work = self.node.work_buffer.get(block=True)
+        
 class Server:
 
-    def __init__(self, node_data: Node):
-        self.node_data = node_data
+    def __init__(self, node: Node):
+        self.node = node
+
+        # List of possible request and the function to handle it
+        self.REQUEST = {
+            "JOIN" : self.node.accept_join_request
+        }
+
+    def start_server(self):
+        # Start listening for request
+        self.set_up_request_socket()
 
     def set_up_request_socket(self):
+        # Create a new socket and bind it to the node IP
         self.request_socket = socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.request_socket.bind((self.node_data.ip, self.node_data.server_port))
-        self.start_a_thread(self.dispatch_request)
-
-    def start_a_thread(self, function, args_=()):
-        thread = threading.Thread(target=function, args=args_)
-        thread.start()
+        self.request_socket.bind((self.node.ip, self.node.server_port))
+        # Start request dispatching
+        start_a_thread(self.dispatch_request)
 
     def dispatch_request(self):
-        self.request_socket.listen()
-        connection, address = self.request_socket.accept()
+        while True:
+            # Listen for request
+            self.request_socket.listen()
+            # Accept connection
+            connection, address = self.request_socket.accept()
+            # Dispatch a new thread to carry out request
+            start_a_thread(self.handle_request, (connection, address))
+
+    def handle_request(self, connection, address):
+        # Grab the request
         request = data_transmitters.receive_json(connection, address)
+        
+        # Get the type of request
+        type_of_request = request["type"]
+
+        # Use the type to call the right function
+        # Pass the data in the request to that function
+        success = self.REQUEST[type_of_request](request["data"])
+
+        # Build response
+        response = {"success": success}
+        
+        # Send response back
+        data_transmitters.send_json(connection, response)
+        
+        # Close connection
         connection.close()
-        print(request)
+
+def start_a_thread(self, function, args_=()):
+        thread = threading.Thread(target=function, args=args_)
+        thread.start()
