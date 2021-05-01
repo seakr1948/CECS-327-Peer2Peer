@@ -3,6 +3,7 @@ from socket import socket
 import uuid
 import dataStructures.file as file_
 import communication.data_transmitters as data_transmitters
+from fileSystemHelpers.Watcher import Watcher
 import logging
 import threading
 
@@ -173,7 +174,8 @@ class Node:
 class Client:
     def __init__(self, node: Node):
         self.node = node
-        # self.set_up_client_socket()
+        self.set_up_client_socket()
+        self.file_watcher = Watcher(self.node.folder_complete_path)
 
     def set_up_client_socket(self):
         self.client_socket = socket(socket.AF_INET, socket.SOCK_STREAM)
