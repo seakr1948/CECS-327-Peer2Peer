@@ -29,6 +29,9 @@ class Node:
         self.client_port = client_port
         self.encoder = [9, 4, 3, 6]
         self.network_key = network_key
+
+        # Meta data path 
+        self.meta_data_path = path.join(self.folder_complete_path , "meta.json")
         
         # Work buffer for the client
         self.work_buffer = LifoQueue()
@@ -74,7 +77,6 @@ class Node:
                 if file not in self.ignore_file_names:
                     # Compute the relative path of the file
                     paths = [
-                        self.folder_relative_path,
                         path.relpath(complete_folder_path, self.folder_relative_path),
                         file,
                     ]
@@ -82,37 +84,46 @@ class Node:
                     
                     # Make a File object out of it, see: dataStuctures.file
                     file_objects.append(
-                        file_.File(relative_path_of_file, self.uuid, self.encoder)
+                        file_.File(self.folder_complete_path, relative_path_of_file, self.uuid, self.encoder)
                     )
 
-        # Open a new meta file
-        json_file = open(self.folder_complete_path + "/meta.json", "w")
-
         # Get all meta_data from each file in a list
-        list_of_meta_data = {}
+        meta_data = {}
         for file in file_objects:
-            list_of_meta_data.update(file.to_dict())
+            meta_data.update(file.to_dict())
+
+        self.write_to_meta_data_file(meta_data)
+
+    def write_to_meta_data_file(self, data):
+        # Open meta data
+        meta_data_file = open(self.meta_data_path, "w")
 
         # Make a jsonstring out of the data and write to the file 
         json.dump(
-            list_of_meta_data,
+            data,
             json_file,
             indent=4,
             separators=(", ", ": "),
             sort_keys=True,
         )
+
         # Close file
-        json_file.close()
+        meta_data_file.close()
 
     def load_meta_data(self):
 
         try:
-            file = open(self.folder_complete_path + "/meta.json", "r")
+            path_to_meta = path.join(self.folder_complete_path, "meta.json")
+            file = open(path_to_meta, "r")
 
-            self.meta_data = json.load(file.read())
-            print(self.meta_data)
+            self.meta_data = json.loads(file.read())
         except:
             print("meta does not exist")
+
+    def update_file_meta_data(self, file_uuid, meta_data):
+        self.load_meta_data()
+        self.meta_data.update({file_uuid: meta_data})
+        self.write_to_meta_data_file(self.meta_data)
 
     def get_node_meta_data(self):
         return {"UUID": self.uuid(), "IP": self.ip, "REQUEST_PORT": self.request_port}
@@ -127,8 +138,24 @@ class Node:
             return True
         
         return False
-            
+    
+    def fetch_file_meta_data(self, uuid_str):
+        self.load_meta_data()
+        return self.meta_data[uuid_str]
+    
+    def fetch_file(self, uuid_str):
+        file_meta_data = self.fetch_file_meta_data(uuid_str)
         
+        relative_file_path = file_meta_data["relative_path"]
+        complete_file_path = path.join(self.folder_complete_path, relative_file_path)
+        
+        file = open(complete_file_path, 'r')
+
+        return file
+
+    def add_file(self, file_uuid, meta_data, file):
+        self.update_file_meta_data(file_uuid, meta_data)
+
 class Client:
 
     def __init__(self, node: Node):
@@ -169,6 +196,16 @@ class Client:
         
         return response
     
+    def request_file(self, file_uuid):
+        request = {
+            "type": "FILE",
+            "data": {
+                "uuid": file_uuid
+            }
+        }
+
+        response = {}
+
     def wait_for_work(self):
         # While true block for work
         while True:
@@ -181,7 +218,7 @@ class Server:
 
         # List of possible request and the function to handle it
         self.REQUEST = {
-            "JOIN" : self.node.accept_join_request
+            "JOIN" : self.node.accept_join_request,
         }
 
     def start_server(self):
