@@ -195,7 +195,7 @@ class Client:
             "data": {
                 "NETWORK_KEY": network_key,
                 "IP": self.node.ip,
-                "NODE_UUID": self.node.uuid,
+                "NODE_UUID": str(self.node.uuid),
                 "SERVER_PORT": self.node.server_port,
                 "FILES": [file_uuid for file_uuid in self.node.meta_data.keys()],
             },
@@ -209,6 +209,7 @@ class Client:
 
             # Send join request
             data_transmitters.send_json(self.client_socket, request)
+
             # Listen for repsonse
             self.client_socket.listen()
             # Recieve data
@@ -216,6 +217,7 @@ class Client:
 
         except:
             print("Something went wrong during join request")
+            self.client_socket.close()
             return None
 
         return response
