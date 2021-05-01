@@ -2,6 +2,13 @@ import argparse
 import socket
 import dataStructures.node as node
 
+def join_network(node: node.Node):
+
+    new_ip = input("Enter Ip")
+    server_port = input("Server Port")
+
+    node.client.request_join_network(new_ip, server_port, network_key=9999)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
@@ -29,13 +36,6 @@ if __name__ == "__main__":
     if args.init_network:
         node.init_network()
     else:
-        pass
+        join_network(node)
 
-
-def join_network(node: node.Node):
-
-    new_ip = input("Enter Ip")
-    server_port = input("Server Port")
-
-    node.client.request_join_network(new_ip, server_port, network_key=9999)
 
