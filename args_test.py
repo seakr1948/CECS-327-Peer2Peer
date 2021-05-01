@@ -9,7 +9,7 @@ def join_network(node: node.Node):
     new_ip = '192.168.1.86'
     server_port = 5556
 
-    node.client.request_join_network(new_ip, server_port, network_key=9999)
+    print(node.client.request_join_network(new_ip, server_port, network_key=9999))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

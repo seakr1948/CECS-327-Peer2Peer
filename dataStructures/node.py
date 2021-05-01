@@ -140,18 +140,24 @@ class Node:
         self.write_to_meta_data_file(self.meta_data)
 
     def get_node_meta_data(self):
-        return {"UUID": self.uuid(), "IP": self.ip, "REQUEST_PORT": self.request_port}
+        return {"UUID": str(self.uuid), "IP": self.ip, "SERVER_PORT": self.server_port}
 
     def accept_join_request(self, data):
         # If the network key matches
-        if data["KEY"] == self.network_key:
+        response = {"SUCCESS": False}
+        if data["NETWORK_KEY"] == self.network_key:
             print("Adding node to peers")
             new_node_uuid = uuid.uuid4()
             self.peers.update({new_node_uuid: data})
 
-            return True
+            self.load_meta_data()
+            response.update({"SUCCESS": True})
+            response.update({"FILES": [file_uuid for file_uuid in self.meta_data.keys()]})
+            response.update(self.get_node_meta_data())
 
-        return False
+            return response
+
+        return response
 
     def fetch_file_meta_data(self, uuid_str):
         self.load_meta_data()
@@ -195,12 +201,10 @@ class Client:
             "type": "JOIN",
             "data": {
                 "NETWORK_KEY": network_key,
-                "IP": self.node.ip,
-                "NODE_UUID": str(self.node.uuid),
-                "SERVER_PORT": self.node.server_port,
                 "FILES": [file_uuid for file_uuid in self.node.meta_data.keys()],
             },
         }
+        request.update(self.node.get_node_meta_data())
 
         response = {}
 
@@ -210,14 +214,9 @@ class Client:
 
             # Send join request
             data_transmitters.send_json(self.client_socket, request)
-            print("sent")
 
-            print(self.client_socket)
-
-            # Listen for repsonse
-            # Recieve data
+            # Recieve response
             response = data_transmitters.receive_json(self.client_socket)
-            print(response)
 
         except:
             traceback.print_exc()
@@ -270,26 +269,16 @@ class Server:
     def handle_request(self, connection, address):
         # Grab the request
         request = data_transmitters.receive_json(connection)
-        print(request)
 
-        """
         # Get the type of request
         type_of_request = request["type"]
 
         # Use the type to call the right function
         # Pass the data in the request to that function
-        success = self.REQUEST[type_of_request](request["data"])
-
-        # Build response
-        response = {"success": success}
+        response = self.REQUEST[type_of_request](request["data"])
 
         # Send response back
         data_transmitters.send_json(connection, response)
-
-        # Close connection
-        """
-        data_transmitters.send_json(connection, {"succces": True})
-        connection.close()
     
     def echo_request(self, request):
         print(request)
