@@ -1,13 +1,17 @@
 import time
 import os
+from queue import LifoQueue
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
+
 
 class Watcher():
     def __init__(self, path):
         self.complete_path = path
         self.relative_path = os.path.relpath(path)
         self.event_handler = PatternMatchingEventHandler("*", "", False, True)
+        self.mod_info = {} #path, isFile, eventType
+        self.event_queue = LifoQueue()
         
         self.event_handler.on_created = self.on_created
         self.event_handler.on_deleted = self.on_deleted
@@ -25,17 +29,20 @@ class Watcher():
         self.my_observer.join()
 
     def on_created(self, event):
-        print(f"{event.src_path} has been created.")
+        self.en_que(event)
 
     def on_deleted(self, event):
-        print(f"{event.src_path} has been deleted.")
+        self.en_que(event)
 
     def on_modified(self, event):
-        print(f"{event.src_path} has been modified.")
+        self.en_que(event)
 
     def on_moved(self, event):
-        print(f"{event.src_path} has been moved to {event.dest_path}.")
+        self.en_que(event)
 
+    def en_que(self, event):
+        self.event_queue.put(dict({"PATH": event.src_path, "IS_DIRECTORY": event.is_directory, "EVENT_TYPE": event.event_type}))
+        print(dict({"PATH": event.src_path, "IS_DIRECTORY": event.is_directory, "EVENT_TYPE": event.event_type}))
 
 if __name__ == "__main__":
     #path = os.path.join(os.getcwd(),"TestFolder")
@@ -44,7 +51,7 @@ if __name__ == "__main__":
     watch = Watcher(path)
     watch.start_Watching()
 
-    time.sleep(20)
+    time.sleep(50)
     watch.stop_Watching()
     
     print("done")
