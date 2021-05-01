@@ -1,0 +1,4 @@
+*.pyc
+*.ignore
+*.json
+.vscode/settings.json
