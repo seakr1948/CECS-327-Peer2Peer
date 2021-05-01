@@ -54,10 +54,12 @@ class Node:
 
     def add_ignore_files(self, file_names: list):
         self.ignore_file_names.extend(*file_names)
-    
+
     def load_ignore_file_names(self):
         try:
-            with open(path.abspath(self.folder_complete_path + "/" + ".ignore")) as file_names:
+            with open(
+                path.abspath(self.folder_complete_path + "/" + ".ignore")
+            ) as file_names:
                 self.add_ignore_files(file_names)
         except:
             print("No ignored files")
@@ -70,7 +72,7 @@ class Node:
         # Walk the tree of the directory and append a zipped stucture of directory and file names
         for (dirpath, dirnames, filenames) in walk(self.folder_complete_path):
             file_structure.append((dirpath, filenames))
-        
+
         file_objects = []
         # Loop through each directory
         for folder in file_structure:
@@ -146,17 +148,35 @@ class Node:
         response = {"SUCCESS": False}
         if data["NETWORK_KEY"] == self.network_key:
             print("Adding node to peers")
-            new_node_uuid = uuid.uuid4()
-            self.peers.update({new_node_uuid: data})
+            self.add_peer(data["NODE_DATA"])
 
             self.load_meta_data()
-            response.update({"SUCCESS": True})
-            response.update({"FILES": [file_uuid for file_uuid in self.meta_data.keys()]})
-            response.update(self.get_node_meta_data())
+            response.update(
+                {
+                    "SUCCESS": True,
+                    "FILES": [file_uuid for file_uuid in self.meta_data.keys()],
+                    "NODE_DATA": self.get_node_meta_data(),
+                }
+            )
 
             return response
 
         return response
+
+    def add_peer(self, peer_data):
+        if "peers" not in self:
+            self.peers = {}
+
+        self.peers.update(
+            {
+                peer_data["UUID"]: {
+                    "IP": peer_data["IP"],
+                    "SERVER_PORT": peer_data["SERVER_PORT"],
+                }
+            }
+        )
+
+        print(self.peers)
 
     def fetch_file_meta_data(self, uuid_str):
         self.load_meta_data()
@@ -175,9 +195,9 @@ class Node:
     def add_file(self, file_uuid, meta_data, file_content):
         self.update_file_meta_data(file_uuid, meta_data)
         self.write_file_content(meta_data["relative_path"], file_content)
-    
+
     def write_file_content(self, relative_path, file_content):
-        file = open(path.join(self.folder_complete_path, relative_path), 'w')
+        file = open(path.join(self.folder_complete_path, relative_path), "w")
         file.write(file_content)
         file.close()
 
@@ -207,9 +227,9 @@ class Client:
             "data": {
                 "NETWORK_KEY": network_key,
                 "FILES": [file_uuid for file_uuid in self.node.meta_data.keys()],
+                "NODE_DATA": self.node.get_node_meta_data(),
             },
         }
-        request.update(self.node.get_node_meta_data())
 
         response = {}
 
@@ -225,7 +245,7 @@ class Client:
 
         except:
             traceback.print_exc()
-            #self.client_socket.close()
+            # self.client_socket.close()
             return None
 
         return response
@@ -239,11 +259,14 @@ class Client:
         # While true block for work
         while True:
             work = self.node.work_buffer.get(block=True)
-    
+            print(work)
+
     def wait_for_file_update(self):
         # While true block for file updates
         while True:
             update = self.file_watcher.event_queue.get(block=True)
+            print(update)
+
 
 class Server:
     def __init__(self, node: Node):
@@ -288,7 +311,7 @@ class Server:
 
         # Send response back
         data_transmitters.send_json(connection, response)
-    
+
     def echo_request(self, request):
         print(request)
 

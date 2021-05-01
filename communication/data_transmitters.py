@@ -5,19 +5,18 @@ import traceback
 
 def receive_json(connection):
 
-    try: 
+    try:
         data_recieved = connection.recv(1024)
     except:
         traceback.print_exc()
         return None
-    
 
     return dict(json.loads(data_recieved))
 
 
 def send_json(connection, message):
 
-    try: 
+    try:
 
         # Deserialize JSON and sent it to the server
         json_string = json.dumps(message)

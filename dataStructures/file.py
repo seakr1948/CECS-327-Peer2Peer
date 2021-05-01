@@ -13,9 +13,9 @@ class File:
         relative_path: str,
         origin_node: uuid.UUID,
         encoder: list,
-        file_uuid = None,
+        file_uuid=None,
     ):
-        if (file_uuid == None):
+        if file_uuid == None:
             self.file_uuid = uuid.uuid4()
         else:
             self.file_uuid = file_uuid
