@@ -6,6 +6,7 @@ import communication.data_transmitters as data_transmitters
 from fileSystemHelpers.Watcher import Watcher
 import logging
 import threading
+import traceback
 
 from os import path
 from os import walk
@@ -209,15 +210,18 @@ class Client:
 
             # Send join request
             data_transmitters.send_json(self.client_socket, request)
+            print("sent")
+
+            print(self.client_socket)
 
             # Listen for repsonse
-            self.client_socket.listen()
             # Recieve data
             response = data_transmitters.receive_json(self.client_socket)
+            print(response)
 
         except:
-            print("Something went wrong during join request")
-            self.client_socket.close()
+            traceback.print_exc()
+            #self.client_socket.close()
             return None
 
         return response
