@@ -15,15 +15,15 @@ def check_sum(relative_path: str, complete_path: str, encoder: list):
     Return:
         sum (int): some of the checksum
     """
-    
+
     # Get name of file
     name_of_file = path.basename(complete_path)
 
     # Get timestamp as string
     timestamp = get_time_stamp(complete_path)
-    
+
     # Open the file
-    file = open(complete_path, 'r')
+    file = open(complete_path, "r")
 
     # Append timestamp, name_of_file, and complete path
     check_sum_contents = file.readlines()
@@ -49,36 +49,38 @@ def check_sum(relative_path: str, complete_path: str, encoder: list):
 
     return sum
 
+
 def get_time_stamp(complete_path: str):
     """
-    Gets the last modified timestamp of a file as a string 
+    Gets the last modified timestamp of a file as a string
     Args:
         complete_path (str): Complete path to the file
     Return:
         sum (Datetime): Last time of modifiction a string
     """
-    
+
     # If the OS of the machine is windows
     if platform.system() == "Windows":
         time_modified_since = path.getctime(complete_path)
-    
+
     # If the OS of the machine is UNIX based
     else:
         stat = os.stat(complete_path)
         time_modified_since = stat.st_mtime
-    
+
     # Convert to string
-    mod_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time_modified_since))
-    mod_time = datetime.strptime(mod_time, '%Y-%m-%d %H:%M:%S')
+    mod_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time_modified_since))
+    mod_time = datetime.strptime(mod_time, "%Y-%m-%d %H:%M:%S")
 
     return mod_time
-    
+
+
 if __name__ == "__main__":
-    
+
     relative_path = sys.argv[1]
-    
-    default_encoder = [9,4,2,5,8]
+
+    default_encoder = [9, 4, 2, 5, 8]
 
     complete_path = path.abspath(relative_path)
-    
+
     print(check_sum(complete_path, default_encoder))

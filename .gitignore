@@ -1,2 +1,8 @@
+image.jpg
 *.pyc
 *.ignore
+*.json
+.vscode/settings.json
+test_folder/meta.json~d9d6d60e08d8cdd7bac561c669f38b0bea0ad684
+test_folder/meta.json
+test_folder/meta.json

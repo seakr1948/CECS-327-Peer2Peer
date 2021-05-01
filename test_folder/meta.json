@@ -1,16 +1,30 @@
-[
-    {
-        "check_sum": 23497, 
-        "data_modified": "2021-04-24 21:51:06", 
-        "name": "data.txt", 
-        "origin_node": "f6d3a213-8929-4c12-be20-459faf520146", 
-        "relative_path": "./test_folder/data.txt"
-    }, 
-    {
-        "check_sum": 24248, 
-        "data_modified": "2021-04-24 22:03:52", 
+{
+    "928ec03e-2c03-44ed-a0b5-ce2acd67cdde": {
+        "check_sum": 25053, 
+        "data_modified": "2021-04-30 21:15:08", 
         "name": "data2.txt", 
-        "origin_node": "f6d3a213-8929-4c12-be20-459faf520146", 
-        "relative_path": "./test_folder/data2.txt"
+        "origin_node": "ece0f349-e273-40c9-aa29-d11200192778", 
+        "relative_path": "./test_folder/./data2.txt"
+    }, 
+    "979332d6-d973-470e-9bfe-eff31ce105a7": {
+        "check_sum": 24783, 
+        "data_modified": "2021-04-30 23:00:58", 
+        "name": "meta.json", 
+        "origin_node": "ece0f349-e273-40c9-aa29-d11200192778", 
+        "relative_path": "./test_folder/./meta.json"
+    }, 
+    "9bc5f18f-2359-4a2a-9127-aa9e2d49d6af": {
+        "check_sum": 23653, 
+        "data_modified": "2021-04-30 21:15:08", 
+        "name": "data.txt", 
+        "origin_node": "ece0f349-e273-40c9-aa29-d11200192778", 
+        "relative_path": "./test_folder/./data.txt"
+    }, 
+    "fed4b854-6808-47dc-b424-3661ce0a8606": {
+        "check_sum": 315833, 
+        "data_modified": "2021-04-30 21:15:19", 
+        "name": "meta.json~d9d6d60e08d8cdd7bac561c669f38b0bea0ad684", 
+        "origin_node": "ece0f349-e273-40c9-aa29-d11200192778", 
+        "relative_path": "./test_folder/./meta.json~d9d6d60e08d8cdd7bac561c669f38b0bea0ad684"
     }
-]
+}
