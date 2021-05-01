@@ -19,6 +19,7 @@ class Node:
         server_port: str,
         client_port: str,
         network_key=9999,
+        uuid: uuid.UUID = uuid.uuid4(),
     ):
 
         # Standard node data
@@ -30,21 +31,21 @@ class Node:
         self.encoder = [9, 4, 3, 6]
         self.network_key = network_key
 
-        # Meta data path 
-        self.meta_data_path = path.join(self.folder_complete_path , "meta.json")
-        
+        self.uuid = uuid
+
+        # Meta data path
+        self.meta_data_path = path.join(self.folder_complete_path, "meta.json")
+
         # Work buffer for the client
         self.work_buffer = LifoQueue()
         self.client = Client(self)
         self.server = Server(self)
-        
+
     def __str__(self):
         return str(self.uuid) + "\n" + str(self.peers)
 
     def init_network(self):
 
-        # Init a uuid for this node
-        self.uuid = uuid.uuid4()
         # Starts a dict of peers
         self.peers = {}
 
@@ -68,7 +69,7 @@ class Node:
         file_objects = []
         # Loop through each directory
         for folder in file_structure:
-            folder_files = folder[1] # Files in directory
+            folder_files = folder[1]  # Files in directory
             complete_folder_path = folder[0]  # Path of the directory
 
             # Loop through each file name in directory
@@ -81,10 +82,15 @@ class Node:
                         file,
                     ]
                     relative_path_of_file = path.join(*paths)
-                    
+
                     # Make a File object out of it, see: dataStuctures.file
                     file_objects.append(
-                        file_.File(self.folder_complete_path, relative_path_of_file, self.uuid, self.encoder)
+                        file_.File(
+                            self.folder_complete_path,
+                            relative_path_of_file,
+                            self.uuid,
+                            self.encoder,
+                        )
                     )
 
         # Get all meta_data from each file in a list
@@ -98,10 +104,10 @@ class Node:
         # Open meta data
         meta_data_file = open(self.meta_data_path, "w")
 
-        # Make a jsonstring out of the data and write to the file 
+        # Make a jsonstring out of the data and write to the file
         json.dump(
             data,
-            json_file,
+            meta_data_file,
             indent=4,
             separators=(", ", ": "),
             sort_keys=True,
@@ -130,50 +136,60 @@ class Node:
 
     def accept_join_request(self, data):
         # If the network key matches
-        if data["key"] == self.network_key:
+        if data["KEY"] == self.network_key:
             print("Adding node to peers")
             new_node_uuid = uuid.uuid4()
             self.peers.update({new_node_uuid: data})
 
             return True
-        
+
         return False
-    
+
     def fetch_file_meta_data(self, uuid_str):
         self.load_meta_data()
         return self.meta_data[uuid_str]
-    
+
     def fetch_file(self, uuid_str):
         file_meta_data = self.fetch_file_meta_data(uuid_str)
-        
+
         relative_file_path = file_meta_data["relative_path"]
         complete_file_path = path.join(self.folder_complete_path, relative_file_path)
-        
-        file = open(complete_file_path, 'r')
+
+        file = open(complete_file_path, "r")
 
         return file
 
     def add_file(self, file_uuid, meta_data, file):
         self.update_file_meta_data(file_uuid, meta_data)
 
-class Client:
+    def update_file_meta(self, file_uuid, updated_meta: dict):
+        self.load_meta_data()
+        file_meta_data = self.meta_data[file_uuid]
 
+        for key in updated_meta.keys():
+            file_meta_data.update({key: updated_meta[key]})
+
+
+class Client:
     def __init__(self, node: Node):
         self.node = node
-        #self.set_up_client_socket()
+        # self.set_up_client_socket()
 
     def set_up_client_socket(self):
         self.client_socket = socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.bind((self.node.ip, self.node.client_port))
 
     def request_join_network(self, ip, port, network_key: int):
+        self.node.load_meta_data()
         # Create join request
         request = {
             "type": "JOIN",
             "data": {
-                "key": network_key,
-                "ip": self.node.ip,
-                "Request_port": self.node.server_port,
+                "NETWORK_KEY": network_key,
+                "IP": self.node.ip,
+                "NODE_UUID": self.node.uuid,
+                "SERVER_PORT": self.node.server_port,
+                "FILES": [file_uuid for file_uuid in self.node.meta_data.keys()],
             },
         }
 
@@ -182,27 +198,22 @@ class Client:
         try:
             # Connect to node which in which this client wants to join
             self.client_socket.connect((ip, port))
-            
+
             # Send join request
             data_transmitters.send_json(self.client_socket, request)
             # Listen for repsonse
             self.client_socket.listen()
             # Recieve data
-            response  = data_transmitters.receive_json(self.client_socket)
+            response = data_transmitters.receive_json(self.client_socket)
 
         except:
             print("Something went wrong during join request")
             return None
-        
+
         return response
-    
+
     def request_file(self, file_uuid):
-        request = {
-            "type": "FILE",
-            "data": {
-                "uuid": file_uuid
-            }
-        }
+        request = {"type": "FILE", "data": {"uuid": file_uuid}}
 
         response = {}
 
@@ -210,15 +221,15 @@ class Client:
         # While true block for work
         while True:
             work = self.node.work_buffer.get(block=True)
-        
-class Server:
 
+
+class Server:
     def __init__(self, node: Node):
         self.node = node
 
         # List of possible request and the function to handle it
         self.REQUEST = {
-            "JOIN" : self.node.accept_join_request,
+            "JOIN": self.node.accept_join_request,
         }
 
     def start_server(self):
@@ -244,7 +255,7 @@ class Server:
     def handle_request(self, connection, address):
         # Grab the request
         request = data_transmitters.receive_json(connection, address)
-        
+
         # Get the type of request
         type_of_request = request["type"]
 
@@ -254,13 +265,14 @@ class Server:
 
         # Build response
         response = {"success": success}
-        
+
         # Send response back
         data_transmitters.send_json(connection, response)
-        
+
         # Close connection
         connection.close()
 
+
 def start_a_thread(self, function, args_=()):
-        thread = threading.Thread(target=function, args=args_)
-        thread.start()
+    thread = threading.Thread(target=function, args=args_)
+    thread.start()

@@ -9,6 +9,7 @@ def receive_json(connection, address):
 
     return dict(json.loads(data_recieved))
 
+
 def send_json(connection, message):
 
     with connection:
@@ -19,5 +20,3 @@ def send_json(connection, message):
         # Convert to bytes
         json_to_bytes = json_string.encode("utf-8")
         temp_socket.send(json_to_bytes)
-        
-    

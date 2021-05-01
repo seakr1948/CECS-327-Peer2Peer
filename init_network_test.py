@@ -12,5 +12,6 @@ if __name__ == "__main__":
 
     test_node = node.Node(relative_path, ip, server_port_number, client_port_number)
     test_node.init_network()
+    # test_node.init_meta_file()
     test_node.load_meta_data()
-    test_node.fetch_file("98f4df11-e582-4588-8545-c8c2d125b822")
+    print(test_node.fetch_file("b88ab083-d82c-452c-af20-0246a264734a").readlines())
