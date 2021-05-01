@@ -41,8 +41,14 @@ class Watcher():
         self.en_que(event)
 
     def en_que(self, event):
-        self.event_queue.put(dict({"PATH": event.src_path, "IS_DIRECTORY": event.is_directory, "EVENT_TYPE": event.event_type}))
-        print(dict({"PATH": event.src_path, "IS_DIRECTORY": event.is_directory, "EVENT_TYPE": event.event_type}))
+        if os.path.isdir(event.src_path) and event.event_type == "modified":
+            pass
+        else:
+            dest = ''
+            if event.event_type == "moved":
+                dest = event.dest_path
+            self.event_queue.put(dict({"PATH_SRC": event.src_path, "PATH_DEST": dest, "IS_DIRECTORY": event.is_directory, "EVENT_TYPE": event.event_type}))
+            print(dict({"PATH": event.src_path, "PATH_DEST": dest, "IS_DIRECTORY": event.is_directory, "EVENT_TYPE": event.event_type}))
 
 if __name__ == "__main__":
     #path = os.path.join(os.getcwd(),"TestFolder")
@@ -51,7 +57,7 @@ if __name__ == "__main__":
     watch = Watcher(path)
     watch.start_Watching()
 
-    time.sleep(50)
+    time.sleep(100)
     watch.stop_Watching()
     
     print("done")
