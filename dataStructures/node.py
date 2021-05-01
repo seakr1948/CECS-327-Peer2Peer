@@ -263,9 +263,9 @@ class Server:
 
     def handle_request(self, connection, address):
         # Grab the request
-        request = data_transmitters.receive_json(connection, address)
-        self.echo_request(request)
-        
+        request = data_transmitters.receive_json(connection)
+        print(request)
+
         """
         # Get the type of request
         type_of_request = request["type"]
@@ -282,9 +282,10 @@ class Server:
 
         # Close connection
         """
+        data_transmitters.send_json(connection, {"succces": True})
         connection.close()
     
-    def echo_request(request):
+    def echo_request(self, request):
         print(request)
 
 
