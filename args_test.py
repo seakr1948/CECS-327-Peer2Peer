@@ -19,11 +19,23 @@ if __name__ == "__main__":
     relative_path = args.shared_folder
 
     node = node.Node(relative_path, ip, server_port_number, client_port_number)
-
-    if args.init_network:
-        node.init_network()
+    node.load_ignore_file_names()
 
     if args.load:
         node.load_meta_data()
     else:
         node.init_meta_file()
+
+    if args.init_network:
+        node.init_network()
+    else:
+        pass
+
+
+def join_network(node: node.Node):
+
+    new_ip = input("Enter Ip")
+    server_port = input("Server Port")
+
+    node.client.request_join_network(new_ip, server_port, network_key=9999)
+

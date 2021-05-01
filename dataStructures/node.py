@@ -50,11 +50,15 @@ class Node:
 
         # Starts a dict of peers
         self.peers = {}
+        self.server.start_server()
 
+    def add_ignore_files(self, file_names: list):
+        self.ignore_file_names.extend(*file_names)
+    
+    def load_ignore_file_names(self):
         try:
-            with open(path.abspath(self.folder_complete_path + "/" + ".ignore")) as f:
-                for file_name in f:
-                    self.ignore_file_names.append(file_name.strip("\n"))
+            with open(path.abspath(self.folder_complete_path + "/" + ".ignore")) as file_names:
+                self.add_ignore_files(file_names)
         except:
             print("No ignored files")
 
@@ -249,6 +253,7 @@ class Server:
 
     def dispatch_request(self):
         while True:
+            print("listening")
             # Listen for request
             self.request_socket.listen()
             # Accept connection
@@ -283,6 +288,6 @@ class Server:
         print(request)
 
 
-def start_a_thread(self, function, args_=()):
+def start_a_thread(function, args_=()):
     thread = threading.Thread(target=function, args=args_)
     thread.start()
