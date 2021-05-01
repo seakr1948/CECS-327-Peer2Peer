@@ -1,5 +1,5 @@
 import json
-from socket import socket
+import socket
 import uuid
 import dataStructures.file as file_
 import communication.data_transmitters as data_transmitters
@@ -31,6 +31,7 @@ class Node:
         self.client_port = client_port
         self.encoder = [9, 4, 3, 6]
         self.network_key = network_key
+        self.ignore_file_names = []
 
         self.uuid = uuid
 
@@ -51,7 +52,6 @@ class Node:
         self.peers = {}
 
         try:
-            self.ignore_file_names = []
             with open(path.abspath(self.folder_complete_path + "/" + ".ignore")) as f:
                 for file_name in f:
                     self.ignore_file_names.append(file_name.strip("\n"))
@@ -66,7 +66,7 @@ class Node:
         # Walk the tree of the directory and append a zipped stucture of directory and file names
         for (dirpath, dirnames, filenames) in walk(self.folder_complete_path):
             file_structure.append((dirpath, filenames))
-
+        
         file_objects = []
         # Loop through each directory
         for folder in file_structure:
@@ -77,6 +77,8 @@ class Node:
             for file in folder_files:
                 # If not part of the ignore files
                 if file not in self.ignore_file_names:
+                    print(file)
+                    print(self.ignore_file_names)
                     # Compute the relative path of the file
                     paths = [
                         path.relpath(complete_folder_path, self.folder_relative_path),
@@ -178,7 +180,7 @@ class Client:
         self.file_watcher = Watcher(self.node.folder_complete_path)
 
     def set_up_client_socket(self):
-        self.client_socket = socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.bind((self.node.ip, self.node.client_port))
 
     def request_join_network(self, ip, port, network_key: int):
@@ -240,7 +242,7 @@ class Server:
 
     def set_up_request_socket(self):
         # Create a new socket and bind it to the node IP
-        self.request_socket = socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.request_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.request_socket.bind((self.node.ip, self.node.server_port))
         # Start request dispatching
         start_a_thread(self.dispatch_request)
@@ -257,7 +259,9 @@ class Server:
     def handle_request(self, connection, address):
         # Grab the request
         request = data_transmitters.receive_json(connection, address)
-
+        self.echo_request(request)
+        
+        """
         # Get the type of request
         type_of_request = request["type"]
 
@@ -272,7 +276,11 @@ class Server:
         data_transmitters.send_json(connection, response)
 
         # Close connection
+        """
         connection.close()
+    
+    def echo_request(request):
+        print(request)
 
 
 def start_a_thread(self, function, args_=()):
