@@ -51,7 +51,6 @@ class Node:
 
         # Starts a dict of peers
         self.peers = {}
-        self.server.start_server()
 
     def add_ignore_files(self, file_names: list):
         self.ignore_file_names.extend(*file_names)
@@ -173,8 +172,14 @@ class Node:
 
         return file
 
-    def add_file(self, file_uuid, meta_data, file):
+    def add_file(self, file_uuid, meta_data, file_content):
         self.update_file_meta_data(file_uuid, meta_data)
+        self.write_file_content(meta_data["relative_path"], file_content)
+    
+    def write_file_content(self, relative_path, file_content):
+        file = open(path.join(self.folder_complete_path, relative_path), 'w')
+        file.write(file_content)
+        file.close()
 
     def update_file_meta(self, file_uuid, updated_meta: dict):
         self.load_meta_data()
@@ -234,7 +239,11 @@ class Client:
         # While true block for work
         while True:
             work = self.node.work_buffer.get(block=True)
-
+    
+    def wait_for_file_update(self):
+        # While true block for file updates
+        while True:
+            update = self.file_watcher.event_queue.get(block=True)
 
 class Server:
     def __init__(self, node: Node):

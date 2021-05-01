@@ -9,7 +9,10 @@ def join_network(node: node.Node):
     new_ip = '192.168.1.86'
     server_port = 5556
 
-    print(node.client.request_join_network(new_ip, server_port, network_key=9999))
+    response = node.client.request_join_network(new_ip, server_port, network_key=9999)
+
+    if(response["SUCCESS"] == True):
+        node.server.start_server()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -34,6 +37,8 @@ if __name__ == "__main__":
         node.load_meta_data()
     else:
         node.init_meta_file()
+
+    node.server.start_server()
 
     if args.init_network:
         node.init_network()
