@@ -133,7 +133,7 @@ class Node:
             "SERVER_PORT": self.peers[node_id]["SERVER_PORT"],
             "REQUEST": {
                 "TYPE": "FETCH_FILE",
-                "DATA": {"FILE": data["FILE"], "NODE": node_id},
+                "DATA": {"FILE": data["FILE"], "NODE": str(self.uuid)},
             },
         }
 
