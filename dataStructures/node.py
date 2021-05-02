@@ -326,7 +326,7 @@ class Server:
             # Accept connection
             connection, address = self.request_socket.accept()
             # Dispatch a new thread to carry out request
-            start_a_thread(self.handle_request, (connection))
+            start_a_thread(self.handle_request, (connection, ))
 
     def handle_request(self, connection):
         # Grab the request
