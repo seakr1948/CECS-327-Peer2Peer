@@ -44,6 +44,8 @@ if __name__ == "__main__":
     else:
         node.init_meta_file()
 
+    node.server.start_server()
+
     if args.init_network:
         node.init_network()
     else:
