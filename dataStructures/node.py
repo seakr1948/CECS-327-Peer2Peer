@@ -419,13 +419,15 @@ class Server:
             # Grab the request
             request = data_transmitters.receive_json(connection)
             self.echo_request(request)
-            if request == None:
-                continue
-            # Get the type of request
-            type_of_request = request["TYPE"]
-            print("REQUEST TYPE: " + type_of_request)
-            if type_of_request == "RECV_FILE":
-                self.recv_file(connection)
+
+            try: 
+                # Get the type of request
+                type_of_request = request["TYPE"]
+                print("REQUEST TYPE: " + type_of_request)
+                if type_of_request == "RECV_FILE":
+                    self.recv_file(connection)
+                    continue
+            except:
                 continue
 
             # Use the type to call the right function
