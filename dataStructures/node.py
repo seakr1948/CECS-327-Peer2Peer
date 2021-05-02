@@ -110,7 +110,6 @@ class Node:
             and data["NODE_DATA"]["UUID"] not in self.peers
         ):
             print(data)
-            self.handle_network_accept(data)
             work = {
                 "TYPE": "SEND_REQUEST",
                 "DATA": {
@@ -119,8 +118,8 @@ class Node:
                     "SERVER_PORT": data["NODE_DATA"]["SERVER_PORT"],
                 },
             }
-
             self.add_work_to_worker(work)
+            self.handle_network_accept(data)
 
     def handle_network_accept(self, data):
         self.node_data_handler.add_peer(data["NODE_DATA"])
@@ -398,10 +397,10 @@ class Server:
         start_a_thread(self.dispatch_request)
 
     def dispatch_request(self):
+        # Listen for request
+        self.request_socket.listen()
         while True:
             print("listening")
-            # Listen for request
-            self.request_socket.listen()
             # Accept connection
             connection, address = self.request_socket.accept()
             # Dispatch a new thread to carry out request
