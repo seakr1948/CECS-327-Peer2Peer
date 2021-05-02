@@ -50,7 +50,7 @@ class Node:
         self.WORK = {
             "SEND_REQUEST": self.client.send_request,
             "SERVE_FILE": self.client.send_file,
-            "FETCH_FILE": self.request_file
+            "FETCH_FILE": self.request_file,
         }
 
     def start_worker(self):
@@ -128,7 +128,10 @@ class Node:
         data = {
             "IP": self.peers[node_id]["IP"],
             "SERVER_PORT": self.peers[node_id]["SERVER_PORT"],
-            "REQUEST": {"TYPE": "FETCH_FILE", "DATA": { data } },
+            "REQUEST": {
+                "TYPE": "FETCH_FILE",
+                "DATA": {"FILE": data["FILE"], "NODE": node_id},
+            },
         }
 
         self.client.send_request(data)
@@ -143,22 +146,20 @@ class Node:
         work = {
             "TYPE": "SERVE_FILE",
             "DATA": {
-                "META_DATA": file_meta_data,
+                "META_DATA": {"FILE": file_id, "META_DATA": file_meta_data},
                 "FILE_CONTENT": file_buffer,
-                "NODE": node_id
-            }
+                "NODE": node_id,
+            },
         }
 
         self.add_work_to_worker(work)
 
     def handle_file_add(self, data):
-        file_meta_data = data["META_DATA"]
+        file_id = data["META_DATA"]["FILE"]
+        file_data = data["META_DATA"]["META_DATA"]
         file_content_bytes = data["FILE_CONTENT"]
-        
-        self.node_data_handler.add_file(da)
-        # TOD0: ADD FILE ID TO THE PROCESS
-    
 
+        self.node_data_handler.add_file(file_id, file_data, file_content_bytes)
 
 
 class DataHandler:
@@ -344,31 +345,31 @@ class Client:
         data_transmitters.send_json(self.client_socket, request)
 
         return self.client_socket
-    
+
     def send_file(self, data):
         ip = self.node.peers[data["NODE"]]["IP"]
         port = self.node.peers[data["NODE"]]["SERVER_PORT"]
-        
+
         file_buffer = data["FILE_CONTENT"]
         file_meta_data = data["META_DATA"]
 
-        header = {
-            "TYPE": "RECV_FILE",
-            "DATA": "INCOMING_FILE"
-        }
+        header = {"TYPE": "RECV_FILE", "DATA": "INCOMING_FILE"}
 
         try:
             # Send join request
-            data_transmitters.send_file(self.client_socket, file_buffer, file_meta_data, header)
+            data_transmitters.send_file(
+                self.client_socket, file_buffer, file_meta_data, header
+            )
 
         except:
             self.client_socket.connect((ip, port))
 
         # Send join request
-        data_transmitters.send_file(self.client_socket, file_buffer, file_meta_data, header)
+        data_transmitters.send_file(
+            self.client_socket, file_buffer, file_meta_data, header
+        )
 
         return self.client_socket
-
 
 
 class Server:
@@ -379,7 +380,7 @@ class Server:
         self.REQUEST = {
             "JOIN": self.node.handle_join_request,
             "FETCH_FILE": self.node.handle_file_request,
-            "RECV_FILE": self.node.handle_file_add
+            "RECV_FILE": self.node.handle_file_add,
         }
 
     def start_server(self):
@@ -425,12 +426,8 @@ class Server:
 
     def recv_file(self, connection):
         meta_data, file_buffer = data_transmitters.receive_file(connection)
-        data = {
-            "META_DATA" : meta_data,
-            "FILE_CONTENT": file_buffer
-        }
+        data = {"META_DATA": meta_data, "FILE_CONTENT": file_buffer}
         self.REQUEST["RECV_FILE"](data)
-
 
     def serve_file(self, connection):
         pass
