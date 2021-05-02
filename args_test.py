@@ -8,7 +8,7 @@ def join_network(node: node.Node):
     # new_ip = input("Enter Ip: ")
     # server_port = int(input("Server Port: "))
     new_ip = "192.168.1.86"
-    server_port = 5512
+    server_port = 5515
 
     node.request_network_join(new_ip, server_port, network_key=9999)
 
@@ -27,13 +27,15 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-
-    ip = socket.gethostbyname(socket.gethostname())
+    
+    ip = [ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.") and not ip.endswith('.1')][:1][0]
     server_port_number = args.server_port
     client_port_number = args.client_port
     relative_path = args.shared_folder
 
     node = node.Node(relative_path, ip, server_port_number, client_port_number)
+    print(node.server_port)
+    print(node.ip)
     node.node_data_handler.load_ignore_file_names()
     node.server.start_server()
     node.start_worker()
