@@ -310,7 +310,7 @@ class DataHandler:
         self.write_file_content(meta_data["relative_path"], file_content)
 
     def write_file_content(self, relative_path, file_content):
-        file = open(path.join(self.node.folder_complete_path, relative_path), "w")
+        file = open(path.join(self.node.folder_complete_path, relative_path), "wb")
         file.write(file_content)
         file.close()
 
