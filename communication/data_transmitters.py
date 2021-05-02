@@ -36,7 +36,7 @@ def send_json(connection: socket.socket, message):
     json_string = pad_message(json_string)
     # Convert to bytes
     json_to_bytes = json_string.encode("utf-8")
-    connection.send(json_to_bytes)
+    connection.sendall(json_to_bytes)
 
 
 def send_file(connection: socket.socket, file: BytesIO, meta_data, header):
@@ -44,7 +44,7 @@ def send_file(connection: socket.socket, file: BytesIO, meta_data, header):
     send_json(connection, header)
     send_json(connection, meta_data)
 
-    connection.sendall(file)
+    connection.sendall(file.read())
 
 def receive_file(connection: socket.socket):
 
