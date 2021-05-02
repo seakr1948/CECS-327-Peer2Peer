@@ -19,7 +19,7 @@ def unpad_message(message: str):
 def receive_json(connection: socket.socket):
 
     try:
-        data_recieved = connection.recv(MESSAGE_LENGTH)
+        data_recieved = recv_all(connection, MESSAGE_LENGTH)
         data = data_recieved.decode('utf-8')
         unpadded_message = unpad_message(data)
         print(unpadded_message + "<- \n\n")
@@ -27,6 +27,9 @@ def receive_json(connection: socket.socket):
     except:
         traceback.print_exc()
         return None
+
+def recv_all(connection: socket.socket, size):
+    return connection.recv(size, socket.MSG_WAITALL)
 
 
 def send_json(connection: socket.socket, message):
@@ -52,7 +55,7 @@ def receive_file(connection: socket.socket):
     file_size = meta_data["META_DATA"]["file_size"]
     file_buffer = BytesIO()
 
-    file = connection.recv(file_size)
+    file = recv_all(connection, file_size)
     file_buffer.write(file)
     
     return meta_data, file_buffer
