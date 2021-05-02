@@ -3,7 +3,7 @@ import socket
 import json
 import traceback
 
-MESSAGE_LENGTH = 1024
+MESSAGE_LENGTH = 2048
 
 
 def pad_message(message: str):
