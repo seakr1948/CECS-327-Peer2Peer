@@ -425,6 +425,8 @@ class Server:
         except:
             traceback.print_exc()
             print("REQUEST not set up yet")
+        
+        connection.close()
 
     def recv_file(self, connection):
         meta_data, file_buffer = data_transmitters.receive_file(connection)
