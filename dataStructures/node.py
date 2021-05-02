@@ -159,6 +159,8 @@ class Node:
                 }
             )
 
+            print(response)
+
             return response
 
         return response
