@@ -334,12 +334,12 @@ class Server:
         self.echo_request(request)
 
         # Get the type of request
-        type_of_request = request["type"]
+        type_of_request = request["TYPE"]
 
         # Use the type to call the right function
         # Pass the data in the request to that function
         try:
-            self.REQUEST[type_of_request](request["data"])
+            self.REQUEST[type_of_request](request["DATA"])
         except:
             traceback.print_exc()
             print("REQUEST not set up yet")
