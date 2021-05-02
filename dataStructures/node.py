@@ -112,9 +112,8 @@ class Node:
             self.add_work_to_worker(work)
 
     def handle_network_accept(self, data):
-        if data["SUCCESS"] == True:
-            self.node_data_handler.add_peer(data["NODE_DATA"])
-            self.add_uuid_to_worker(data["FILES"], data["NODE_DATA"]["UUID"])
+        self.node_data_handler.add_peer(data["NODE_DATA"])
+        self.add_uuid_to_worker(data["FILES"], data["NODE_DATA"]["UUID"])
 
 
 class DataHandler:
