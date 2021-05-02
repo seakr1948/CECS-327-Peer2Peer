@@ -63,13 +63,12 @@ class Node:
     def wait_for_work(self):
         # While true block for work
         while True:
-            if self.peers == {}: 
-                continue
-            work = self.work_buffer.get(block=True)
             try:
+                work = self.work_buffer.get(block=True)
+                print(work)
                 self.WORK[work["TYPE"]](work["DATA"])
             except:
-                self.work_buffer.put(work)
+                traceback.print_exc()
 
     def wait_for_file_update(self):
         # While true block for file updates
@@ -110,6 +109,7 @@ class Node:
             data["NETWORK_KEY"] == self.network_key
             and data["NODE_DATA"]["UUID"] not in self.peers
         ):
+            print(data)
             self.handle_network_accept(data)
             work = {
                 "TYPE": "SEND_REQUEST",
