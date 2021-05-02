@@ -413,7 +413,7 @@ class Server:
         while True:
             # Grab the request
             request = data_transmitters.receive_json(connection)
-            self.echo_request(request)
+            #self.echo_request(request)
 
             try: 
                 # Get the type of request
