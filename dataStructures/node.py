@@ -35,6 +35,7 @@ class Node:
         self.ignore_file_names = []
 
         self.uuid = uuid
+        self.peers = {}
 
         # Meta data path
         self.meta_data_path = path.join(self.folder_complete_path, "meta.json")
@@ -245,17 +246,30 @@ class Client:
             # Recieve response
             response = data_transmitters.receive_json(self.client_socket)
 
+            if response["SUCCESS"] == True:
+                self.node.add_peer(response["NODE_DATA"])
+                for uuid in response["FILES"]:
+                    self.node.work_buffer.put({
+                        "FILE": uuid 
+                    })
+            
+            self.start_worker()
+
         except:
             traceback.print_exc()
             # self.client_socket.close()
             return None
-
-        return response
-
+        
     def request_file(self, file_uuid):
         request = {"type": "FILE", "data": {"uuid": file_uuid}}
 
         response = {}
+
+    def start_worker(self):
+        start_a_thread(self.wait_for_work)
+    
+    def start_watcher(self):
+        start_a_thread(self.wait_for_file_update)
 
     def wait_for_work(self):
         # While true block for work
@@ -319,7 +333,6 @@ class Server:
             traceback.print_exc()
             print("REQUEST not set up yet")
             
-
     def echo_request(self, request):
         print(request)
 

@@ -10,10 +10,7 @@ def join_network(node: node.Node):
     new_ip = "192.168.1.86"
     server_port = 5556
 
-    response = node.client.request_join_network(new_ip, server_port, network_key=9999)
-
-    if response["SUCCESS"] == True:
-        node.add_peer(response["NODE_DATA"])
+    node.client.request_join_network(new_ip, server_port, network_key=9999)
 
 
 if __name__ == "__main__":
