@@ -45,10 +45,9 @@ def send_file(connection: socket.socket, file: BytesIO, meta_data, header):
     send_json(connection, meta_data)
     print(file.read().decode())
 
-    l = file.read(MESSAGE_LENGTH)
+    l = file.read()
     while l:
-        connection.send(l)
-        l = file.read(MESSAGE_LENGTH)
+        connection.sendall(l)
 
 def receive_file(connection: socket.socket):
 
@@ -56,12 +55,7 @@ def receive_file(connection: socket.socket):
     file_size = meta_data["META_DATA"]["file_size"]
     file_buffer = BytesIO()
 
-    chunks_receieved = MESSAGE_LENGTH
-    l = connection.recv(MESSAGE_LENGTH)
-    while chunks_receieved < file_size:
-        file_buffer.write(l)
-        l = connection.recv(MESSAGE_LENGTH)
-        chunks_receieved += MESSAGE_LENGTH
+    connection.recv(file_size)
     
     return meta_data, file_buffer
     
