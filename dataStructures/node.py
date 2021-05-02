@@ -65,7 +65,7 @@ class Node:
         while True:
             try:
                 work = self.work_buffer.get(block=True)
-                print(work)
+                print(work["TYPE"])
                 self.WORK[work["TYPE"]](work["DATA"])
             except:
                 traceback.print_exc()
@@ -109,7 +109,6 @@ class Node:
             data["NETWORK_KEY"] == self.network_key
             and data["NODE_DATA"]["UUID"] not in self.peers
         ):
-            print(data)
             work = {
                 "TYPE": "SEND_REQUEST",
                 "DATA": {
