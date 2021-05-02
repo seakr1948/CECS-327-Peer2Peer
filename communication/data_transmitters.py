@@ -20,7 +20,7 @@ def receive_json(connection: socket.socket):
 
     try:
         data_recieved = connection.recv(MESSAGE_LENGTH)
-        data = data_recieved.decode('UTF-8')
+        data = data_recieved.decode('utf-8')
         unpadded_message = unpad_message(data)
         print(unpadded_message + "<- \n\n")
     except:
@@ -53,7 +53,7 @@ def send_file(connection: socket.socket, file: BytesIO, meta_data, header):
 def receive_file(connection: socket.socket):
 
     meta_data = receive_json(connection)
-    file_size = meta_data["file_size"]
+    file_size = meta_data["META_DATA"]["file_size"]
     file_buffer = BytesIO()
 
     chunks_receieved = MESSAGE_LENGTH
