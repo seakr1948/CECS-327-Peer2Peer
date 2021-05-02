@@ -8,7 +8,7 @@ def join_network(node: node.Node):
     # new_ip = input("Enter Ip: ")
     # server_port = int(input("Server Port: "))
     new_ip = "192.168.1.86"
-    server_port = 5556
+    server_port = 5510
 
     node.client.request_join_network(new_ip, server_port, network_key=9999)
 

@@ -253,6 +253,7 @@ class Client:
 
             if response["SUCCESS"] == True:
                 self.node.add_peer(response["NODE_DATA"])
+                self.node.add_uuid_to_worker(response["FILES"])
                 
             
             self.start_worker()
