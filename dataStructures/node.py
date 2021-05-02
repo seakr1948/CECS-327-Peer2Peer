@@ -60,7 +60,10 @@ class Node:
         # While true block for work
         while True:
             work = self.node.work_buffer.get(block=True)
-            self.WORK[work["TYPE"]](work["DATA"])
+            try:
+                self.WORK[work["TYPE"]](work["DATA"])
+            except:
+                print(str(work) + " NOT SET UP YET.")
 
     def wait_for_file_update(self):
         # While true block for file updates
@@ -70,7 +73,13 @@ class Node:
     
     def add_uuid_to_worker(self, file_uuids, node_uuid):
         for uuid in file_uuids:
-            self.add_work_to_worker("GET", uuid, node_uuid)
+            self.add_work_to_worker({
+                "TYPE" : "FETCH_FILE",
+                "DATA" : {
+                    "FILE": uuid,
+                    "NODE": node_uuid 
+                }
+            })
 
     def add_work_to_worker(self, work):
         self.work_buffer.put(work)
