@@ -57,6 +57,7 @@ def receive_file(connection: socket.socket):
 
     file = recv_all(connection, file_size)
     print(file + " <--")
+    print(file.decode() + "<---")
     file_buffer.write(file)
     
     return meta_data, file_buffer
