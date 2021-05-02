@@ -344,6 +344,7 @@ class Client:
 
         # Send join request
         data_transmitters.send_json(self.client_socket, request)
+        print("sent")
 
         return self.client_socket
 
@@ -397,9 +398,9 @@ class Server:
 
     def dispatch_request(self):
         # Listen for request
-        self.request_socket.listen()
         while True:
             print("listening")
+            self.request_socket.listen()
             # Accept connection
             connection, address = self.request_socket.accept()
             # Dispatch a new thread to carry out request
