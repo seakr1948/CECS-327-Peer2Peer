@@ -44,7 +44,6 @@ def send_json(connection: socket.socket, message):
 
 def send_file(connection: socket.socket, file: BytesIO, header):
     send_json(connection, header)
-    connection.recv()
 
     connection.send(file.read(header["META_DATA"]["file_size"]))
 
