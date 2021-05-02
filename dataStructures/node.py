@@ -210,12 +210,16 @@ class Node:
         for key in updated_meta.keys():
             file_meta_data.update({key: updated_meta[key]})
 
-    def add_uuid_to_worker(self, file_uuids):
+    def add_uuid_to_worker(self, file_uuids, node_uuid):
         for uuid in file_uuids:
-            self.work_buffer.put({
-                "FILE": uuid 
-            })
-        
+            self.add_work_to_worker("GET", uuid, node_uuid)
+
+    def add_work_to_worker(self, type, file_uuid, node_uuid):
+        self.work_buffer.put({
+            "TYPE": type,
+            "FILE": file_uuid,
+            "NODE": node_uuid
+        })
 
 class Client:
     def __init__(self, node: Node):
@@ -223,9 +227,13 @@ class Client:
         self.set_up_client_socket()
         self.file_watcher = Watcher(self.node.folder_complete_path)
 
+        self.WORK = {
+            "GET" : self.request_file
+        }
+
+
     def set_up_client_socket(self):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.bind((self.node.ip, self.node.client_port))
 
     def request_join_network(self, ip, port, network_key: int):
         self.node.load_meta_data()
@@ -253,7 +261,7 @@ class Client:
 
             if response["SUCCESS"] == True:
                 self.node.add_peer(response["NODE_DATA"])
-                self.node.add_uuid_to_worker(response["FILES"])
+                self.node.add_uuid_to_worker(response["FILES"], response["NODE_DATA"]["UUID"])
                 
             
             self.start_worker()
@@ -262,11 +270,23 @@ class Client:
             traceback.print_exc()
             # self.client_socket.close()
             return None
+
         
-    def request_file(self, file_uuid):
+    def request_file(self, file_uuid, node_uuid):
         request = {"type": "FILE", "data": {"uuid": file_uuid}}
 
-        response = {}
+        # Find the node ip and port
+        node_ip = self.node.peers[node_uuid]["IP"]
+        node_port = self.node.peers[node_uuid]["SERVER_PORT"]
+
+        try:
+            self.client_socket.connect(node_ip, node_port)
+        except:
+            traceback.print_exc()
+            print("Already connecte here")
+
+        print(request)
+        data_transmitters.send_json(self.client_socket, request)
 
     def start_worker(self):
         start_a_thread(self.wait_for_work)
@@ -278,7 +298,7 @@ class Client:
         # While true block for work
         while True:
             work = self.node.work_buffer.get(block=True)
-            print(work)
+            self.WORK[work["TYPE"]](work["FILE"], work["NODE"])
 
     def wait_for_file_update(self):
         # While true block for file updates
