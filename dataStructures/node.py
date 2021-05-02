@@ -59,7 +59,7 @@ class Node:
     def wait_for_work(self):
         # While true block for work
         while True:
-            work = self.node.work_buffer.get(block=True)
+            work = self.work_buffer.get(block=True)
             self.WORK[work["TYPE"]](work["DATA"])
 
     def wait_for_file_update(self):
