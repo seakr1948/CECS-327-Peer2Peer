@@ -74,6 +74,9 @@ def get_time_stamp(complete_path: str):
 
     return mod_time
 
+def get_file_size(complete_path: str):
+    stats = os.stat(complete_path)
+    return stats.st_size
 
 if __name__ == "__main__":
 

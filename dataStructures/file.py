@@ -28,6 +28,7 @@ class File:
         self.check_sum = checksum.check_sum(
             self.relative_path, self.complete_path, encoder
         )
+        self.file_size_bytes = checksum.get_file_size(self.complete_path)
 
     def to_dict(self):
 
@@ -38,6 +39,7 @@ class File:
                 "name": self.name,
                 "origin_node": str(self.origin_node),
                 "check_sum": self.check_sum,
+                "file_size": self.file_size_bytes
             }
         }
 
