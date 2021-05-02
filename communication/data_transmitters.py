@@ -49,7 +49,7 @@ def send_file(connection: socket.socket, file: BytesIO, meta_data, header):
     send_json(connection, meta_data)
     connection.recv(1)
 
-    connection.sendall(file.read(meta_data["BUFFER_SIZE"]))
+    connection.send(file.read(meta_data["BUFFER_SIZE"]))
 
 def receive_file(connection: socket.socket):
 
