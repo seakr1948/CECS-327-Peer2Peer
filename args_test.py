@@ -45,5 +45,6 @@ if __name__ == "__main__":
 
     if args.init_network:
         node.init_network()
+        node.client.start_worker()
     else:
         join_network(node)

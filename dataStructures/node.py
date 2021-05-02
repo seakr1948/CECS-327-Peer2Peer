@@ -150,6 +150,7 @@ class Node:
         if data["NETWORK_KEY"] == self.network_key:
             print("Adding node to peers")
             self.add_peer(data["NODE_DATA"])
+            self.add_uuid_to_worker(data["FILES"])
 
             self.load_meta_data()
             response.update(
@@ -159,8 +160,6 @@ class Node:
                     "NODE_DATA": self.get_node_meta_data(),
                 }
             )
-
-            print(response)
 
             return response
 
@@ -211,6 +210,12 @@ class Node:
         for key in updated_meta.keys():
             file_meta_data.update({key: updated_meta[key]})
 
+    def add_uuid_to_worker(self, file_uuids):
+        for uuid in file_uuids:
+            self.node.work_buffer.put({
+                "FILE": uuid 
+            })
+        
 
 class Client:
     def __init__(self, node: Node):
@@ -248,10 +253,7 @@ class Client:
 
             if response["SUCCESS"] == True:
                 self.node.add_peer(response["NODE_DATA"])
-                for uuid in response["FILES"]:
-                    self.node.work_buffer.put({
-                        "FILE": uuid 
-                    })
+                
             
             self.start_worker()
 
