@@ -63,7 +63,7 @@ class Node:
             try:
                 self.WORK[work["TYPE"]](work["DATA"])
             except:
-                print(str(work) + " NOT SET UP YET.")
+                print("GOT WORK")
 
     def wait_for_file_update(self):
         # While true block for file updates
@@ -168,8 +168,6 @@ class DataHandler:
             for file in folder_files:
                 # If not part of the ignore files
                 if file not in self.node.ignore_file_names:
-                    print(file)
-                    print(self.node.ignore_file_names)
                     # Compute the relative path of the file
                     paths = [
                         path.relpath(
@@ -247,7 +245,7 @@ class DataHandler:
             }
         )
 
-        print(self.node.peers)
+        print("PEERS: " + str(self.node.peers.keys()))
 
     def fetch_file_meta_data(self, uuid_str):
         self.node.load_meta_data()
@@ -339,10 +337,11 @@ class Server:
     def handle_request(self, connection):
         # Grab the request
         request = data_transmitters.receive_json(connection)
-        self.echo_request(request)
+        #self.echo_request(request)
 
         # Get the type of request
         type_of_request = request["TYPE"]
+        print("REQUEST TYPE: " + type_of_request)
 
         # Use the type to call the right function
         # Pass the data in the request to that function
