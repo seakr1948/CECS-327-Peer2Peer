@@ -356,12 +356,15 @@ class Client:
         file_buffer = data["FILE_CONTENT"]
         file_meta_data = data["META_DATA"]
 
-        header = {"TYPE": "RECV_FILE", "DATA": "INCOMING_FILE"}
+        header = {"TYPE": "RECV_FILE", 
+                    "DATA": {
+                        "META_DATA": file_meta_data,
+                    }}
 
         try:
             # Send join request
             data_transmitters.send_file(
-                self.client_socket, file_buffer, file_meta_data, header
+                self.client_socket, file_buffer, header
             )
 
         except:
@@ -369,7 +372,7 @@ class Client:
 
         # Send join request
         data_transmitters.send_file(
-            self.client_socket, file_buffer, file_meta_data, header
+            self.client_socket, file_buffer, header
         )
 
         return self.client_socket
@@ -383,7 +386,6 @@ class Server:
         self.REQUEST = {
             "JOIN": self.node.handle_join_request,
             "FETCH_FILE": self.node.handle_file_request,
-            "RECV_FILE": self.node.handle_file_add,
         }
 
     def start_server(self):
@@ -417,7 +419,7 @@ class Server:
                 # Get the type of request
                 type_of_request = request["TYPE"]
                 if type_of_request == "RECV_FILE":
-                    self.recv_file(connection)
+                    self.recv_file(connection, request)
                     continue
             except:
                 continue
@@ -432,10 +434,11 @@ class Server:
         
         connection.close()
 
-    def recv_file(self, connection):
-        meta_data, file_buffer = data_transmitters.receive_file(connection)
+    def recv_file(self, connection, request):
+        meta_data = request["DATA"]["META_DATA"]
+        file_buffer = data_transmitters.receive_file(connection, meta_data)
         data = {"META_DATA": meta_data, "FILE_CONTENT": file_buffer}
-        self.REQUEST["RECV_FILE"](data)
+        self.node.handle_file_add(data)
 
     def serve_file(self, connection):
         pass

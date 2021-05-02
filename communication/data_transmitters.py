@@ -42,28 +42,19 @@ def send_json(connection: socket.socket, message):
     connection.sendall(json_to_bytes)
 
 
-def send_file(connection: socket.socket, file: BytesIO, meta_data, header):
-    meta_data.update({"BUFFER_SIZE": file.getbuffer().nbytes})
+def send_file(connection: socket.socket, file: BytesIO, header):
     send_json(connection, header)
     connection.recv()
-    send_json(connection, meta_data)
-    connection.recv()
 
-    connection.send(file.read(meta_data["BUFFER_SIZE"]))
+    connection.send(file.read(header["META_DATA"]["file_size"]))
 
-def receive_file(connection: socket.socket):
+def receive_file(connection: socket.socket, meta_data):
 
-    print(connection.send(bytes('t')))
-    meta_data = receive_json(connection)
-    file_size = meta_data["BUFFER_SIZE"]
-    file_buffer = BytesIO()
-
-    print(connection.send(bytes('t')))
-
+    file_size = meta_data["file_size"]
     file = recv_all(connection, file_size)
-    print(file + " <--")
-    print(file.decode() + "<---")
-    file_buffer.write(file)
+    print(file + " <----STREAM")
+    print(file.decode() + "<---DECODE")
+    file_buffer = BytesIO(file.write(file))
     
     return meta_data, file_buffer
     
