@@ -16,18 +16,13 @@ def receive_json(connection):
 
 def send_json(connection, message):
 
-    try:
-
-        # Deserialize JSON and sent it to the server
-        json_string = json.dumps(message)
-        print(message)
-        # Convert to bytes
-        json_to_bytes = json_string.encode("utf-8")
-        connection.send(json_to_bytes)
-        print(connection)
-    except:
-        traceback.print_exc()
-        return None
+    # Deserialize JSON and sent it to the server
+    json_string = json.dumps(message)
+    print(message)
+    # Convert to bytes
+    json_to_bytes = json_string.encode("utf-8")
+    connection.send(json_to_bytes)
+    print(connection)
 
 
 # 
