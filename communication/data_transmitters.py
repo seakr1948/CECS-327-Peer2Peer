@@ -53,12 +53,12 @@ def send_file(connection: socket.socket, file: BytesIO, meta_data, header):
 
 def receive_file(connection: socket.socket):
 
-    connection.send(bytes('t'))
+    print(connection.send(bytes('t')))
     meta_data = receive_json(connection)
     file_size = meta_data["BUFFER_SIZE"]
     file_buffer = BytesIO()
 
-    connection.send(bytes('t'))
+    print(connection.send(bytes('t')))
 
     file = recv_all(connection, file_size)
     print(file + " <--")
