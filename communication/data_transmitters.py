@@ -8,11 +8,12 @@ def receive_json(connection):
 
     try:
         data_recieved = connection.recv(1024)
+        data_recieved_string = data_recieved.decode('utf-8')
     except:
         traceback.print_exc()
         return None
 
-    return dict(json.loads(data_recieved))
+    return dict(json.loads(data_recieved_string))
 
 
 def send_json(connection, message):
