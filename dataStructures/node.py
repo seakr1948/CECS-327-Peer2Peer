@@ -358,7 +358,7 @@ class Client:
 
         header = {"TYPE": "RECV_FILE", 
                     "DATA": {
-                        "META_DATA": file_meta_data,
+                        "FILE_DATA": file_meta_data,
                     }}
 
         try:
@@ -435,7 +435,7 @@ class Server:
         connection.close()
 
     def recv_file(self, connection, request):
-        meta_data = request["DATA"]["META_DATA"]
+        meta_data = request["DATA"]["FILE_DATA"]["META_DATA"]
         file_buffer = data_transmitters.receive_file(connection, meta_data)
         data = {"META_DATA": meta_data, "FILE_CONTENT": file_buffer}
         self.node.handle_file_add(data)
