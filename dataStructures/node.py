@@ -87,7 +87,12 @@ class Node:
         }
 
     def request_network_join(self, ip, port, network_key):
-        self.client.send_request(ip, port, self.build_join_request(network_key))
+        data = {
+            "IP": ip,
+            "SERVER_PORT": port,
+            "REQUEST": self.build_join_request(network_key)
+        }
+        self.client.send_request(data)
 
     def handle_join_request(self, data):
         if (
