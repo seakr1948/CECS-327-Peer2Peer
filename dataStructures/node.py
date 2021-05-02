@@ -301,16 +301,20 @@ class Server:
     def handle_request(self, connection, address):
         # Grab the request
         request = data_transmitters.receive_json(connection)
+        self.echo_request(request)
 
         # Get the type of request
         type_of_request = request["type"]
 
         # Use the type to call the right function
         # Pass the data in the request to that function
-        response = self.REQUEST[type_of_request](request["data"])
-
-        # Send response back
-        data_transmitters.send_json(connection, response)
+        try:
+            response = self.REQUEST[type_of_request](request["data"])
+            # Send response back
+            data_transmitters.send_json(connection, response)
+        except:
+            print("REQUEST not set up yet")
+            
 
     def echo_request(self, request):
         print(request)
