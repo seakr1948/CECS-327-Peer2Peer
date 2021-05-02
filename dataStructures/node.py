@@ -8,7 +8,7 @@ import logging
 import threading
 import traceback
 
-from os import path
+from os import path, sendfile, waitpid
 from os import walk
 from queue import LifoQueue
 
@@ -39,39 +39,110 @@ class Node:
 
         # Meta data path
         self.meta_data_path = path.join(self.folder_complete_path, "meta.json")
+        self.node_data_handler = DataHandler(self)
 
         # Work buffer for the client
         self.work_buffer = LifoQueue()
         self.client = Client(self)
         self.server = Server(self)
 
+        self.WORK = {
+            "SEND_REQUEST": self.client.send_request
+        }
+
+    def start_worker(self):
+        start_a_thread(self.wait_for_work)
+
+    def start_watcher(self):
+        start_a_thread(self.wait_for_file_update)
+
+    def wait_for_work(self):
+        # While true block for work
+        while True:
+            work = self.node.work_buffer.get(block=True)
+            self.WORK[work["TYPE"]](work["DATA"])
+
+    def wait_for_file_update(self):
+        # While true block for file updates
+        while True:
+            update = self.file_watcher.event_queue.get(block=True)
+            print(update)
+    
+    def add_uuid_to_worker(self, file_uuids, node_uuid):
+        for uuid in file_uuids:
+            self.add_work_to_worker("GET", uuid, node_uuid)
+
+    def add_work_to_worker(self, work):
+        self.work_buffer.put(work)
+
+    def build_join_request(self, network_key):
+        self.node_data_handler.load_meta_data()
+        return {
+            "TYPE": "JOIN",
+            "DATA": {
+                "NETWORK_KEY": network_key,
+                "FILES": [file_uuid for file_uuid in self.meta_data.keys()],
+                "NODE_DATA": self.node_data_handler.get_node_meta_data(),
+            },
+        }
+
+    def request_network_join(self, ip, port, network_key):
+        self.client.send_request(ip, port, self.build_join_request(network_key))
+
+    def handle_join_request(self, data):
+        if (
+            data["NETWORK_KEY"] == self.network_key
+            and data["NODE_DATA"]["UUID"] not in self.peers
+        ):
+            self.handle_network_accept(data)
+            work = {
+                "TYPE": "SEND_REQUEST",
+                "DATA": {
+                    "REQUEST": self.build_join_request(self.network_key),
+                    "IP": data["NODE_DATA"]["IP"],
+                    "SERVER_PORT": data["NODE_DATA"]["SERVER_PORT"]
+                }
+            }
+
+            self.add_work_to_worker(work)
+
+    def handle_network_accept(self, data):
+        if data["SUCCESS"] == True:
+            self.node_data_handler.add_peer(data["NODE_DATA"])
+            self.add_uuid_to_worker(data["FILES"], data["NODE_DATA"]["UUID"])
+
+
+class DataHandler:
+    def __init__(self, node: Node):
+        self.node = node
+
     def __str__(self):
-        return str(self.uuid) + "\n" + str(self.peers)
+        return str(self.node.uuid) + "\n" + str(self.node.peers)
 
     def init_network(self):
 
         # Starts a dict of peers
-        self.peers = {}
+        self.node.peers = {}
 
     def add_ignore_files(self, file_names: list):
-        self.ignore_file_names.extend(*file_names)
+        self.node.ignore_file_names.extend(*file_names)
 
     def load_ignore_file_names(self):
         try:
             with open(
-                path.abspath(self.folder_complete_path + "/" + ".ignore")
+                path.abspath(self.node.folder_complete_path + "/" + ".ignore")
             ) as file_names:
-                self.add_ignore_files(file_names)
+                self.node.add_ignore_files(file_names)
         except:
             print("No ignored files")
 
-        print(self.ignore_file_names)
+        print(self.node.ignore_file_names)
 
     def init_meta_file(self):
         file_structure = []
 
         # Walk the tree of the directory and append a zipped stucture of directory and file names
-        for (dirpath, dirnames, filenames) in walk(self.folder_complete_path):
+        for (dirpath, dirnames, filenames) in walk(self.node.folder_complete_path):
             file_structure.append((dirpath, filenames))
 
         file_objects = []
@@ -83,12 +154,14 @@ class Node:
             # Loop through each file name in directory
             for file in folder_files:
                 # If not part of the ignore files
-                if file not in self.ignore_file_names:
+                if file not in self.node.ignore_file_names:
                     print(file)
-                    print(self.ignore_file_names)
+                    print(self.node.ignore_file_names)
                     # Compute the relative path of the file
                     paths = [
-                        path.relpath(complete_folder_path, self.folder_relative_path),
+                        path.relpath(
+                            complete_folder_path, self.node.folder_relative_path
+                        ),
                         file,
                     ]
                     relative_path_of_file = path.join(*paths)
@@ -112,7 +185,7 @@ class Node:
 
     def write_to_meta_data_file(self, data):
         # Open meta data
-        meta_data_file = open(self.meta_data_path, "w")
+        meta_data_file = open(self.node.meta_data_path, "w")
 
         # Make a jsonstring out of the data and write to the file
         json.dump(
@@ -129,47 +202,30 @@ class Node:
     def load_meta_data(self):
 
         try:
-            path_to_meta = path.join(self.folder_complete_path, "meta.json")
+            path_to_meta = path.join(self.node.folder_complete_path, "meta.json")
             file = open(path_to_meta, "r")
 
-            self.meta_data = json.loads(file.read())
+            self.node.meta_data = json.loads(file.read())
         except:
             print("meta does not exist")
 
     def update_file_meta_data(self, file_uuid, meta_data):
-        self.load_meta_data()
-        self.meta_data.update({file_uuid: meta_data})
-        self.write_to_meta_data_file(self.meta_data)
+        self.node.load_meta_data()
+        self.node.meta_data.update({file_uuid: meta_data})
+        self.write_to_meta_data_file(self.node.meta_data)
 
     def get_node_meta_data(self):
-        return {"UUID": str(self.uuid), "IP": self.ip, "SERVER_PORT": self.server_port}
-
-    def accept_join_request(self, data):
-        # If the network key matches
-        response = {"SUCCESS": False}
-        if data["NETWORK_KEY"] == self.network_key:
-            print("Adding node to peers")
-            self.add_peer(data["NODE_DATA"])
-            self.add_uuid_to_worker(data["FILES"])
-
-            self.load_meta_data()
-            response.update(
-                {
-                    "SUCCESS": True,
-                    "FILES": [file_uuid for file_uuid in self.meta_data.keys()],
-                    "NODE_DATA": self.get_node_meta_data(),
-                }
-            )
-
-            return response
-
-        return response
+        return {
+            "UUID": str(self.node.uuid),
+            "IP": self.node.ip,
+            "SERVER_PORT": self.node.server_port,
+        }
 
     def add_peer(self, peer_data):
-        if hasattr(self, 'peers'):
-            self.peers = {}
+        if hasattr(self.node, "peers"):
+            self.node.peers = {}
 
-        self.peers.update(
+        self.node.peers.update(
             {
                 peer_data["UUID"]: {
                     "IP": peer_data["IP"],
@@ -178,17 +234,19 @@ class Node:
             }
         )
 
-        print(self.peers)
+        print(self.node.peers)
 
     def fetch_file_meta_data(self, uuid_str):
-        self.load_meta_data()
-        return self.meta_data[uuid_str]
+        self.node.load_meta_data()
+        return self.node.meta_data[uuid_str]
 
     def fetch_file(self, uuid_str):
         file_meta_data = self.fetch_file_meta_data(uuid_str)
 
         relative_file_path = file_meta_data["relative_path"]
-        complete_file_path = path.join(self.folder_complete_path, relative_file_path)
+        complete_file_path = path.join(
+            self.node.folder_complete_path, relative_file_path
+        )
 
         file = open(complete_file_path, "r")
 
@@ -199,27 +257,17 @@ class Node:
         self.write_file_content(meta_data["relative_path"], file_content)
 
     def write_file_content(self, relative_path, file_content):
-        file = open(path.join(self.folder_complete_path, relative_path), "w")
+        file = open(path.join(self.node.folder_complete_path, relative_path), "w")
         file.write(file_content)
         file.close()
 
     def update_file_meta(self, file_uuid, updated_meta: dict):
         self.load_meta_data()
-        file_meta_data = self.meta_data[file_uuid]
+        file_meta_data = self.node.meta_data[file_uuid]
 
         for key in updated_meta.keys():
             file_meta_data.update({key: updated_meta[key]})
 
-    def add_uuid_to_worker(self, file_uuids, node_uuid):
-        for uuid in file_uuids:
-            self.add_work_to_worker("GET", uuid, node_uuid)
-
-    def add_work_to_worker(self, type, file_uuid, node_uuid):
-        self.work_buffer.put({
-            "TYPE": type,
-            "FILE": file_uuid,
-            "NODE": node_uuid
-        })
 
 class Client:
     def __init__(self, node: Node):
@@ -227,28 +275,13 @@ class Client:
         self.set_up_client_socket()
         self.file_watcher = Watcher(self.node.folder_complete_path)
 
-        self.WORK = {
-            "GET" : self.request_file
-        }
-
-
     def set_up_client_socket(self):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def request_join_network(self, ip, port, network_key: int):
-        self.node.load_meta_data()
-        # Create join request
-        request = {
-            "type": "JOIN",
-            "data": {
-                "NETWORK_KEY": network_key,
-                "FILES": [file_uuid for file_uuid in self.node.meta_data.keys()],
-                "NODE_DATA": self.node.get_node_meta_data(),
-            },
-        }
-
-        response = {}
-
+    def send_request(self, data):
+        ip = data["IP"]
+        port = data["SERVER_PORT"]
+        request = data["REQUEST"]
         try:
             # Connect to node which in which this client wants to join
             self.client_socket.connect((ip, port))
@@ -256,55 +289,8 @@ class Client:
             # Send join request
             data_transmitters.send_json(self.client_socket, request)
 
-            # Recieve response
-            response = data_transmitters.receive_json(self.client_socket)
-
-            if response["SUCCESS"] == True:
-                self.node.add_peer(response["NODE_DATA"])
-                self.node.add_uuid_to_worker(response["FILES"], response["NODE_DATA"]["UUID"])
-                
-            
-            self.start_worker()
-
         except:
             traceback.print_exc()
-            # self.client_socket.close()
-            return None
-
-        
-    def request_file(self, file_uuid, node_uuid):
-        request = {"type": "FILE", "data": {"uuid": file_uuid}}
-
-        # Find the node ip and port
-        node_ip = self.node.peers[node_uuid]["IP"]
-        node_port = self.node.peers[node_uuid]["SERVER_PORT"]
-
-        try:
-            self.client_socket.connect(node_ip, node_port)
-        except:
-            traceback.print_exc()
-            print("Already connecte here")
-
-        print(request)
-        data_transmitters.send_json(self.client_socket, request)
-
-    def start_worker(self):
-        start_a_thread(self.wait_for_work)
-    
-    def start_watcher(self):
-        start_a_thread(self.wait_for_file_update)
-
-    def wait_for_work(self):
-        # While true block for work
-        while True:
-            work = self.node.work_buffer.get(block=True)
-            self.WORK[work["TYPE"]](work["FILE"], work["NODE"])
-
-    def wait_for_file_update(self):
-        # While true block for file updates
-        while True:
-            update = self.file_watcher.event_queue.get(block=True)
-            print(update)
 
 
 class Server:
@@ -313,7 +299,7 @@ class Server:
 
         # List of possible request and the function to handle it
         self.REQUEST = {
-            "JOIN": self.node.accept_join_request,
+            "JOIN": self.node.handle_join_request,
         }
 
     def start_server(self):
@@ -337,7 +323,7 @@ class Server:
             # Dispatch a new thread to carry out request
             start_a_thread(self.handle_request, (connection, address))
 
-    def handle_request(self, connection, address):
+    def handle_request(self, connection):
         # Grab the request
         request = data_transmitters.receive_json(connection)
         self.echo_request(request)
@@ -348,14 +334,11 @@ class Server:
         # Use the type to call the right function
         # Pass the data in the request to that function
         try:
-            response = self.REQUEST[type_of_request](request["data"])
-            print(response)
-            # Send response back
-            data_transmitters.send_json(connection, response)
+            self.REQUEST[type_of_request](request["data"])
         except:
             traceback.print_exc()
             print("REQUEST not set up yet")
-            
+
     def echo_request(self, request):
         print(request)
 
