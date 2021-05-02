@@ -212,7 +212,7 @@ class Node:
 
     def add_uuid_to_worker(self, file_uuids):
         for uuid in file_uuids:
-            self.node.work_buffer.put({
+            self.work_buffer.put({
                 "FILE": uuid 
             })
         
