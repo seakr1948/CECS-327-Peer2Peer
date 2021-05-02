@@ -44,9 +44,7 @@ def send_file(connection: socket.socket, file: BytesIO, meta_data, header):
     send_json(connection, header)
     send_json(connection, meta_data)
 
-    l = file.read()
-    while l:
-        connection.sendall(l)
+    connection.sendall(file)
 
 def receive_file(connection: socket.socket):
 
