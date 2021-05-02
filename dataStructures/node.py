@@ -309,9 +309,9 @@ class DataHandler:
         self.update_file_meta_data(file_uuid, meta_data)
         self.write_file_content(meta_data["relative_path"], file_content)
 
-    def write_file_content(self, relative_path, file_content):
+    def write_file_content(self, relative_path, file_content: BytesIO):
         file = open(path.join(self.node.folder_complete_path, relative_path), "wb")
-        file.write(file_content)
+        file.write(file_content.read())
         file.close()
 
     def update_file_meta(self, file_uuid, updated_meta: dict):
