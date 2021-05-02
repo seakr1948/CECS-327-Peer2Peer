@@ -65,7 +65,6 @@ class Node:
         while True:
             try:
                 work = self.work_buffer.get(block=True)
-                print(work["TYPE"])
                 self.WORK[work["TYPE"]](work["DATA"])
             except:
                 traceback.print_exc()
@@ -407,7 +406,6 @@ class Server:
             print("Accepted")
             # Dispatch a new thread to carry out request
             start_a_thread(self.handle_request, (connection,))
-            print(connection)
 
     def handle_request(self, connection):
         while True:
