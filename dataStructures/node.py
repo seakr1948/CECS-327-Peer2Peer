@@ -344,6 +344,7 @@ class Client:
 
         # Send join request
         data_transmitters.send_json(self.client_socket, request)
+        print(self.client_socket)
         print("sent")
 
         return self.client_socket
@@ -398,33 +399,35 @@ class Server:
 
     def dispatch_request(self):
         # Listen for request
+        self.request_socket.listen(5)
         while True:
-            print("listening")
-            self.request_socket.listen()
             # Accept connection
             connection, address = self.request_socket.accept()
+            print("Accepted")
             # Dispatch a new thread to carry out request
             start_a_thread(self.handle_request, (connection,))
+            print(connection)
 
     def handle_request(self, connection):
-        # Grab the request
-        request = data_transmitters.receive_json(connection)
-        self.echo_request(request)
+        while True:
+            # Grab the request
+            request = data_transmitters.receive_json(connection)
+            self.echo_request(request)
 
-        # Get the type of request
-        type_of_request = request["TYPE"]
-        print("REQUEST TYPE: " + type_of_request)
-        if type_of_request == "RECV_FILE":
-            self.recv_file(connection)
-            return
+            # Get the type of request
+            type_of_request = request["TYPE"]
+            print("REQUEST TYPE: " + type_of_request)
+            if type_of_request == "RECV_FILE":
+                self.recv_file(connection)
+                return
 
-        # Use the type to call the right function
-        # Pass the data in the request to that function
-        try:
-            self.REQUEST[type_of_request](request["DATA"])
-        except:
-            traceback.print_exc()
-            print("REQUEST not set up yet")
+            # Use the type to call the right function
+            # Pass the data in the request to that function
+            try:
+                self.REQUEST[type_of_request](request["DATA"])
+            except:
+                traceback.print_exc()
+                print("REQUEST not set up yet")
         
         connection.close()
 
