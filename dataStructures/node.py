@@ -176,14 +176,20 @@ class DataHandler:
         self.node.peers = {}
 
     def add_ignore_files(self, file_names: list):
-        self.node.ignore_file_names.extend(*file_names)
+        file_names = [name.strip('\n') for name in file_names]
+        print(file_names)
+        self.node.ignore_file_names.extend(file_names)
 
     def load_ignore_file_names(self):
+        print("here")
         try:
+            print("GETING PATH")
+            path_ = path.join(self.node.folder_complete_path, '.ignore')
+            print(path_)
             with open(
-                path.abspath(self.node.folder_complete_path + "/" + ".ignore")
+               path_
             ) as file_names:
-                self.node.add_ignore_files(file_names)
+                self.add_ignore_files(file_names.readlines())
         except:
             print("No ignored files")
 
