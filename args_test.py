@@ -36,7 +36,7 @@ if __name__ == "__main__":
     node = node.Node(relative_path, ip, server_port_number, client_port_number)
     node.node_data_handler.load_ignore_file_names()
     node.server.start_server()
-    node.start_worker
+    node.start_worker()
 
     if args.load:
         node.node_data_handler.load_meta_data()
