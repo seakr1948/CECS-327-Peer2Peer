@@ -1,3 +1,4 @@
+from io import BytesIO, FileIO
 import socket
 import json
 import traceback
@@ -23,18 +24,27 @@ def send_json(connection, message):
     connection.send(json_to_bytes)
 
 
-# 
-def send_file(connection: socket.socket, file_contents = []):
+def send_file(connection: socket.socket, file: BytesIO, meta_data, header):
 
-    for i in file_contents:
-        connection.send(i)
+    send_json(connection, header)
+    send_json(connection, meta_data)
+
+    l = file.read(1024)
+    while l:
+        connection.send(l)
+        l = file.read(1024)
 
 def receive_file(connection: socket.socket):
 
-    received_data = connection.recv(1024)
-    temp = []
-    while received_data:
-        temp.append(received_data)
-        received_data = connection.recv(1024)
+    meta_data = receive_json(connection)
+    file_buffer = BytesIO()
 
-    return temp
+    l = connection.recv(1024)
+    while l:
+        file_buffer.write(l)
+        l = connection.recv(1024)
+    
+    return meta_data, file_buffer
+    
+
+

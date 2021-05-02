@@ -1,3 +1,4 @@
+from io import BytesIO
 import json
 import socket
 import uuid
@@ -47,7 +48,9 @@ class Node:
         self.server = Server(self)
 
         self.WORK = {
-            "SEND_REQUEST": self.client.send_request
+            "SEND_REQUEST": self.client.send_request,
+            "SERVE_FILE": self.client.send_file,
+            "FETCH_FILE": self.request_file
         }
 
     def start_worker(self):
@@ -70,16 +73,12 @@ class Node:
         while True:
             update = self.file_watcher.event_queue.get(block=True)
             print(update)
-    
+
     def add_uuid_to_worker(self, file_uuids, node_uuid):
         for uuid in file_uuids:
-            self.add_work_to_worker({
-                "TYPE" : "FETCH_FILE",
-                "DATA" : {
-                    "FILE": uuid,
-                    "NODE": node_uuid 
-                }
-            })
+            self.add_work_to_worker(
+                {"TYPE": "FETCH_FILE", "DATA": {"FILE": uuid, "NODE": node_uuid}}
+            )
 
     def add_work_to_worker(self, work):
         self.work_buffer.put(work)
@@ -99,7 +98,7 @@ class Node:
         data = {
             "IP": ip,
             "SERVER_PORT": port,
-            "REQUEST": self.build_join_request(network_key)
+            "REQUEST": self.build_join_request(network_key),
         }
         self.client.send_request(data)
 
@@ -114,8 +113,8 @@ class Node:
                 "DATA": {
                     "REQUEST": self.build_join_request(self.network_key),
                     "IP": data["NODE_DATA"]["IP"],
-                    "SERVER_PORT": data["NODE_DATA"]["SERVER_PORT"]
-                }
+                    "SERVER_PORT": data["NODE_DATA"]["SERVER_PORT"],
+                },
             }
 
             self.add_work_to_worker(work)
@@ -123,6 +122,43 @@ class Node:
     def handle_network_accept(self, data):
         self.node_data_handler.add_peer(data["NODE_DATA"])
         self.add_uuid_to_worker(data["FILES"], data["NODE_DATA"]["UUID"])
+
+    def request_file(self, data):
+        node_id = data["NODE"]
+        data = {
+            "IP": self.peers[node_id]["IP"],
+            "SERVER_PORT": self.peers[node_id]["SERVER_PORT"],
+            "REQUEST": {"TYPE": "FETCH_FILE", "DATA": { data } },
+        }
+
+        self.client.send_request(data)
+
+    def handle_file_request(self, data):
+        file_id = data["FILE"]
+        node_id = data["NODE"]
+
+        file_meta_data = self.node_data_handler.fetch_file_data(file_id)
+        file_buffer = self.node_data_handler.fetch_file(file_id)
+
+        work = {
+            "TYPE": "SERVE_FILE",
+            "DATA": {
+                "META_DATA": file_meta_data,
+                "FILE_CONTENT": file_buffer,
+                "NODE": node_id
+            }
+        }
+
+        self.add_work_to_worker(work)
+
+    def handle_file_add(self, data):
+        file_meta_data = data["META_DATA"]
+        file_content_bytes = data["FILE_CONTENT"]
+        
+        self.node_data_handler.add_file(da)
+        # TOD0: ADD FILE ID TO THE PROCESS
+    
+
 
 
 class DataHandler:
@@ -180,10 +216,10 @@ class DataHandler:
                     # Make a File object out of it, see: dataStuctures.file
                     file_objects.append(
                         file_.File(
-                            self.folder_complete_path,
+                            self.node.folder_complete_path,
                             relative_path_of_file,
-                            self.uuid,
-                            self.encoder,
+                            self.node.uuid,
+                            self.node.encoder,
                         )
                     )
 
@@ -247,21 +283,25 @@ class DataHandler:
 
         print("PEERS: " + str(self.node.peers.keys()))
 
-    def fetch_file_meta_data(self, uuid_str):
+    def fetch_file_data(self, uuid_str):
         self.node.load_meta_data()
         return self.node.meta_data[uuid_str]
 
     def fetch_file(self, uuid_str):
-        file_meta_data = self.fetch_file_meta_data(uuid_str)
+        file_meta_data = self.fetch_file_data(uuid_str)
 
         relative_file_path = file_meta_data["relative_path"]
         complete_file_path = path.join(
             self.node.folder_complete_path, relative_file_path
         )
 
-        file = open(complete_file_path, "r")
+        file_bytes = open(complete_file_path, "rb")
 
-        return file
+        copy_of_file = BytesIO(file_bytes.read())
+
+        file_bytes.close()
+
+        return copy_of_file
 
     def add_file(self, file_uuid, meta_data, file_content):
         self.update_file_meta_data(file_uuid, meta_data)
@@ -294,7 +334,6 @@ class Client:
         port = data["SERVER_PORT"]
         request = data["REQUEST"]
         try:
-            print(self.client_socket)
             # Send join request
             data_transmitters.send_json(self.client_socket, request)
 
@@ -304,6 +343,33 @@ class Client:
         # Send join request
         data_transmitters.send_json(self.client_socket, request)
 
+        return self.client_socket
+    
+    def send_file(self, data):
+        ip = self.node.peers[data["NODE"]]["IP"]
+        port = self.node.peers[data["NODE"]]["SERVER_PORT"]
+        
+        file_buffer = data["FILE_CONTENT"]
+        file_meta_data = data["META_DATA"]
+
+        header = {
+            "TYPE": "RECV_FILE",
+            "DATA": "INCOMING_FILE"
+        }
+
+        try:
+            # Send join request
+            data_transmitters.send_file(self.client_socket, file_buffer, file_meta_data, header)
+
+        except:
+            self.client_socket.connect((ip, port))
+
+        # Send join request
+        data_transmitters.send_file(self.client_socket, file_buffer, file_meta_data, header)
+
+        return self.client_socket
+
+
 
 class Server:
     def __init__(self, node: Node):
@@ -312,6 +378,8 @@ class Server:
         # List of possible request and the function to handle it
         self.REQUEST = {
             "JOIN": self.node.handle_join_request,
+            "FETCH_FILE": self.node.handle_file_request,
+            "RECV_FILE": self.node.handle_file_add
         }
 
     def start_server(self):
@@ -333,16 +401,19 @@ class Server:
             # Accept connection
             connection, address = self.request_socket.accept()
             # Dispatch a new thread to carry out request
-            start_a_thread(self.handle_request, (connection, ))
+            start_a_thread(self.handle_request, (connection,))
 
     def handle_request(self, connection):
         # Grab the request
         request = data_transmitters.receive_json(connection)
-        #self.echo_request(request)
+        # self.echo_request(request)
 
         # Get the type of request
         type_of_request = request["TYPE"]
         print("REQUEST TYPE: " + type_of_request)
+        if type_of_request == "RECV_FILE":
+            self.recv_file(connection)
+            return
 
         # Use the type to call the right function
         # Pass the data in the request to that function
@@ -351,6 +422,18 @@ class Server:
         except:
             traceback.print_exc()
             print("REQUEST not set up yet")
+
+    def recv_file(self, connection):
+        meta_data, file_buffer = data_transmitters.receive_file(connection)
+        data = {
+            "META_DATA" : meta_data,
+            "FILE_CONTENT": file_buffer
+        }
+        self.REQUEST["RECV_FILE"](data)
+
+
+    def serve_file(self, connection):
+        pass
 
     def echo_request(self, request):
         print(request)
