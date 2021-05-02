@@ -166,7 +166,7 @@ class Node:
         return response
 
     def add_peer(self, peer_data):
-        if "peers" not in self:
+        if hasattr(self, 'peers'):
             self.peers = {}
 
         self.peers.update(
@@ -312,9 +312,11 @@ class Server:
         # Pass the data in the request to that function
         try:
             response = self.REQUEST[type_of_request](request["data"])
+            print(response)
             # Send response back
             data_transmitters.send_json(connection, response)
         except:
+            traceback.print_exc()
             print("REQUEST not set up yet")
             
 
