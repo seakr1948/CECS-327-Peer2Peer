@@ -294,16 +294,15 @@ class Client:
         port = data["SERVER_PORT"]
         request = data["REQUEST"]
         try:
-
+            print(self.client_socket)
             # Send join request
             data_transmitters.send_json(self.client_socket, request)
 
         except:
-            # Connect to node which in which this client wants to join
             self.client_socket.connect((ip, port))
 
-            # Send join request
-            data_transmitters.send_json(self.client_socket, request)
+        # Send join request
+        data_transmitters.send_json(self.client_socket, request)
 
 
 class Server:
