@@ -26,3 +26,20 @@ def send_json(connection, message):
         connection.send(json_to_bytes)
     except:
         return None
+
+
+# 
+def send_file(connection: socket.socket, file_contents = []):
+
+    for i in file_contents:
+        connection.send(i)
+
+def receive_file(connection: socket.socket):
+
+    received_data = connection.recv(1024)
+    temp = []
+    while received_data:
+        temp.append(received_data)
+        received_data = connection.recv(1024)
+
+    return temp
