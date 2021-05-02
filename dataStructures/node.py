@@ -181,11 +181,8 @@ class DataHandler:
         self.node.ignore_file_names.extend(file_names)
 
     def load_ignore_file_names(self):
-        print("here")
         try:
-            print("GETING PATH")
             path_ = path.join(self.node.folder_complete_path, '.ignore')
-            print(path_)
             with open(
                path_
             ) as file_names:
@@ -350,8 +347,6 @@ class Client:
 
         # Send join request
         data_transmitters.send_json(self.client_socket, request)
-        print(self.client_socket)
-        print("sent")
 
         return self.client_socket
 
@@ -423,7 +418,6 @@ class Server:
             try: 
                 # Get the type of request
                 type_of_request = request["TYPE"]
-                print("REQUEST TYPE: " + type_of_request)
                 if type_of_request == "RECV_FILE":
                     self.recv_file(connection)
                     continue

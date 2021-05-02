@@ -54,7 +54,8 @@ def receive_file(connection: socket.socket):
     file_size = meta_data["META_DATA"]["file_size"]
     file_buffer = BytesIO()
 
-    connection.recv(file_size)
+    file = connection.recv(file_size)
+    file_buffer.write(file)
     
     return meta_data, file_buffer
     
