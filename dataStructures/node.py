@@ -37,6 +37,7 @@ class Node:
 
         self.uuid = uuid
         self.peers = {}
+        print(uuid)
 
         # Meta data path
         self.meta_data_path = path.join(self.folder_complete_path, "meta.json")
@@ -62,11 +63,13 @@ class Node:
     def wait_for_work(self):
         # While true block for work
         while True:
+            if self.peers == {}: 
+                continue
             work = self.work_buffer.get(block=True)
             try:
                 self.WORK[work["TYPE"]](work["DATA"])
             except:
-                print("GOT WORK")
+                self.work_buffer.put(work)
 
     def wait_for_file_update(self):
         # While true block for file updates
@@ -258,7 +261,7 @@ class DataHandler:
             print("meta does not exist")
 
     def update_file_meta_data(self, file_uuid, meta_data):
-        self.node.load_meta_data()
+        self.load_meta_data()
         self.node.meta_data.update({file_uuid: meta_data})
         self.write_to_meta_data_file(self.node.meta_data)
 
@@ -285,7 +288,7 @@ class DataHandler:
         print("PEERS: " + str(self.node.peers.keys()))
 
     def fetch_file_data(self, uuid_str):
-        self.node.load_meta_data()
+        self.load_meta_data()
         return self.node.meta_data[uuid_str]
 
     def fetch_file(self, uuid_str):
@@ -407,7 +410,7 @@ class Server:
     def handle_request(self, connection):
         # Grab the request
         request = data_transmitters.receive_json(connection)
-        # self.echo_request(request)
+        self.echo_request(request)
 
         # Get the type of request
         type_of_request = request["TYPE"]
