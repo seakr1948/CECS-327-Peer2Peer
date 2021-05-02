@@ -10,7 +10,7 @@ def join_network(node: node.Node):
     new_ip = "192.168.1.86"
     server_port = 5512
 
-    node.client.request_join_network(new_ip, server_port, network_key=9999)
+    node.request_network_join(new_ip, server_port, network_key=9999)
 
 
 if __name__ == "__main__":
@@ -34,17 +34,16 @@ if __name__ == "__main__":
     relative_path = args.shared_folder
 
     node = node.Node(relative_path, ip, server_port_number, client_port_number)
-    node.load_ignore_file_names()
+    node.node_data_handler.load_ignore_file_names()
+    node.server.start_server()
+    node.start_worker
 
     if args.load:
-        node.load_meta_data()
+        node.node_data_handler.load_meta_data()
     else:
-        node.init_meta_file()
-
-    node.server.start_server()
+        node.node_data_handler.init_meta_file()
 
     if args.init_network:
-        node.init_network()
-        node.client.start_worker()
+        node.node_data_handler.init_network()
     else:
         join_network(node)
