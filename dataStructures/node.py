@@ -427,8 +427,8 @@ class Server:
             # Use the type to call the right function
             # Pass the data in the request to that function
             if recv_flag == False:
+                print("NON RECV REQUEST")
                 self.REQUEST[type_of_request](request["DATA"])
-                print("ran here")
             # traceback.print_exc()
             print("REQUEST not set up yet")
 
