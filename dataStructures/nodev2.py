@@ -139,7 +139,18 @@ class Node:
             network_key = data["NETWORK_KEY"]
             file_meta_data = self.repo.get_files()
             node_meta_data = self.get_node_meta_data()
-            work = build_join_work(network_key, file_meta_data, node_meta_data)
+            work = {
+                "TYPE": "SEND_REQUEST",
+                "DATA": {
+                    "TYPE": "JOIN",
+                    "DATA": {
+                        "IP": data["NODE_DATA"]["IP"],
+                        "PORT": data["NODE_DATA"]["SERVER_PORT"],
+                        "FILES": list(self.repo.get_files()),
+                        "NODE_DATA": self.get_node_meta_data()
+                    }
+                }
+            }
             print(work)
             self.add_work_to_worker(work)
             self.handle_network_accept(data)
