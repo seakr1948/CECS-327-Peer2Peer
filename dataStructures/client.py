@@ -55,7 +55,7 @@ class Client:
 
         return self.client_socket
 
-    def build_recv_file_request(file_meta):
+    def build_recv_file_request(self, file_meta):
         return {
             "TYPE": "RECV_FILE",
             "DATA": {
