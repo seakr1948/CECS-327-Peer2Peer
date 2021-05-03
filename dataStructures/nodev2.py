@@ -5,6 +5,7 @@ from dataStructures.client import Client
 from dataStructures.server import Server
 from dataStructures.repo import Repo
 from dataStructures.work_builder import *
+import traceback
 
 class Node:
     def __init__(
@@ -88,6 +89,7 @@ class Node:
                 self.WORK[work["TYPE"]](work["DATA"])
                 print("WORK: " + str(work))
             except:
+                traceback.print_exc()
                 print("WORK FAILED")
     
     def push_request_buffer_to_work(self):
