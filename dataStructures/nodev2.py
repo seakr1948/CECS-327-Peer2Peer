@@ -55,6 +55,10 @@ class Node:
         self.INCOMING_MAP = {
             "ADD": self.handle_file_add,
         }
+
+        self.UPDATES = {
+            "deleted": self.build_delete_work
+        }
     
     def get_node_meta_data(self):
         return {
@@ -109,10 +113,11 @@ class Node:
 
     def wait_for_file_update(self):
         # While true block for file updates
+        self.watcher.start_Watching()
         while True:
-            
-            update = self.file_watcher.event_queue.get()
-            print(update)
+            update = self.watcher.event_queue.get(block=True)
+            parsed_update = self.watcher_parser(update)
+            self.UPDATES[parsed_update["EVENT"]](parsed_update)
 
     def request_network_join(self, ip, port, network_key):
         self.repo.load_meta_data()
@@ -224,7 +229,7 @@ class Node:
         if str(self.uuid) not in data["SIGS"]:
             data["SIGS"].append(str(self.uuid))
             
-            # Delete repo file HERE
+            self.repo.delete(data["FILE"])
             for peer in self.peers:
                 self.client.send_request({
                     "TYPE": "DELETE",
@@ -255,18 +260,33 @@ class Node:
         
         pass
     
-    def watcher_dispatcher(self, event_token):
-        repo.load_meta_data()
-        meta_file = repo.meta_data
+    def watcher_parser(self, event_token):
+        self.repo.load_meta_data()
+        meta_file = self.repo.meta_data
+        print(event_token)
+        rel_path = path.join('./',path.relpath(event_token["PATH"], self.complete_path))
+        print(rel_path)
 
-        for key in meta_file:
-            if key["relative_path"] == event_token["PATH_SRC"]:
-                uuid = key
-        
         event = event_token["EVENT_TYPE"]
+        for key in meta_file.keys():
+            print(meta_file[key]["relative_path"])
+            if meta_file[key]["relative_path"] == rel_path:
+                uuid = key
+                return {"FILE": str(uuid), "EVENT": event }
         
-        return (uuid, event)
-        
+        return None
+    
+    
+    def build_delete_work(self, data):
+
+        work = {
+            "TYPE": "SEND_DELETE",
+            "DATA": {
+                "FILE": data["FILE"]
+            }
+        }
+
+        self.add_work_to_worker(work)
 
 
 

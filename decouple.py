@@ -38,6 +38,7 @@ if __name__ == "__main__":
     node.repo.load_ignore_file_names()
     node.start_server()
     node.start_worker()
+    node.start_watcher()
     node.start_request_transport()
 
     if args.load:

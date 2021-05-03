@@ -52,7 +52,7 @@ class Watcher:
             self.event_queue.put(
                 dict(
                     {
-                        "PATH_SRC": event.src_path,
+                        "PATH": event.src_path,
                         "PATH_DEST": dest,
                         "IS_DIRECTORY": event.is_directory,
                         "EVENT_TYPE": event.event_type,
@@ -62,7 +62,7 @@ class Watcher:
             print(
                 dict(
                     {
-                        "PATH": event.src_path,
+                        "PATH_SRC": event.src_path,
                         "PATH_DEST": dest,
                         "IS_DIRECTORY": event.is_directory,
                         "EVENT_TYPE": event.event_type,
