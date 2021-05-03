@@ -180,3 +180,19 @@ class Repo:
         self.write_to_meta_data_file(self.meta_data)
 
         return str(file_object.file_uuid)
+
+
+    def re_create_meta(self, rel_path, file_id):
+        file_abs_path = os.path.join(self.folder_complete_path, rel_path)
+
+        file_object = File(
+            self.folder_complete_path, rel_path, self.uuid, self.encoder, file_uuid=file_id
+        )
+
+        file_meta = file_object.to_dict()
+
+        self.load_meta_data()
+
+        self.meta_data.update(file_meta)
+
+        self.write_to_meta_data_file(self.meta_data)

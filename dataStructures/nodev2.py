@@ -1,3 +1,4 @@
+from dataStructures.file import File
 from os import path
 from queue import Empty, LifoQueue
 import threading
@@ -54,7 +55,8 @@ class Node:
 
         self.INCOMING_MAP = {
             "ADD": self.handle_file_add,
-            "UPDATE": self.handle_incoming_update
+            "UPDATE": self.handle_incoming_update,
+            "MODIFIED": self.handle_incoming_update
         }
 
         self.UPDATES = {
@@ -261,6 +263,7 @@ class Node:
 
             self.add_work_to_worker(work)
 
+
     def handle_incoming_update(self, data):
         self.repo.delete(data["FILE"])
         self.repo.add_file(
@@ -281,6 +284,8 @@ class Node:
                 file_id = self.repo.file_created(rel_path)
                 return {"FILE": file_id, "EVENT": "created"}
             if meta_file[key]["relative_path"] == rel_path:
+                if event == "moved":
+                    self.repo.re_create_meta(rel_path, str(key))
                 uuid = key
                 return {"FILE": str(uuid), "EVENT": event }
         
@@ -312,6 +317,22 @@ class Node:
             work = build_serve_file_work(file_id, file_meta_data, file_buffer, node_id, ip, port, type_, Sigs)
             print(work)
             self.add_work_to_worker(work)
+    
+    def build_moved_modified_work(self, data):
+        file_id = data["FILE"]
+        type_ = "MODIFIED"
+        Sigs = [str(self.uuid)]
+        for peer in self.peers:
+            file_meta_data = self.repo.fetch_file_data(file_id)
+            file_buffer = self.repo.fetch_file(file_id)
+            node_id = "some_Data"
+            ip = self.peers[peer]["IP"]
+            port = self.peers[peer]["SERVER_PORT"]
+
+            work = build_serve_file_work(file_id, file_meta_data, file_buffer, node_id, ip, port, type_, Sigs)
+            print(work)
+            self.add_work_to_worker(work)
+
 
 
 
