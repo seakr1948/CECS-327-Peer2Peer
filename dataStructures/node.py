@@ -77,6 +77,7 @@ class Node:
 
     def add_uuid_to_worker(self, file_uuids, node_uuid):
         for uuid in file_uuids:
+            print("Added file")
             self.add_work_to_worker(
                 {"TYPE": "FETCH_FILE", "DATA": {"FILE": uuid, "NODE": node_uuid}}
             )
