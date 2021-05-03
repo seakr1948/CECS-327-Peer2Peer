@@ -416,23 +416,25 @@ class Server:
             request = data_transmitters.receive_json(connection)
             #self.echo_request(request)
 
+            recv_flag = False
             try: 
                 # Get the type of request
                 type_of_request = request["TYPE"]
-                if type_of_request == "RECV_FILE":
-                    self.recv_file(connection, request)
-                    continue
             except:
+                print("Request not found")
+
+            if type_of_request == "RECV_FILE":
+                self.recv_file(connection, request)
+                recv_flag = True
                 continue
 
             # Use the type to call the right function
             # Pass the data in the request to that function
-            try:
+            if recv_flag == False:
                 self.REQUEST[type_of_request](request["DATA"])
                 print("ran here")
-            except:
-                traceback.print_exc()
-                print("REQUEST not set up yet")
+            #traceback.print_exc()
+            print("REQUEST not set up yet")
         
         connection.close()
 
