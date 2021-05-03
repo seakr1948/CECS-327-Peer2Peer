@@ -34,13 +34,14 @@ class Server:
             self.echo_request(request)
 
             recv_flag = False
+            type_of_request = None
             try:
                 # Get the type of request
                 type_of_request = request["TYPE"]
             except:
                 print("Request not found")
-            type_of_request = request["TYPE"]
-            if type_of_request == "RECV_FILE":
+
+            if not type_of_request == None and type_of_request == "RECV_FILE":
                 self.recv_file(connection, request)
                 recv_flag = True
                 continue
