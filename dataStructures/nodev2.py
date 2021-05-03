@@ -41,6 +41,7 @@ class Node:
         self.WORK = {
             "SEND_REQUEST": self.client.send_request,
             "SERVE_FILE": self.client.send_file,
+            "FILE_REQUEST": self.handle_file_request,
             "FETCH_FILE": self.request_file,
             "RECV_FILE": self.handle_file_add,
             "JOIN": self.handle_join_request
@@ -136,6 +137,7 @@ class Node:
             data["NETWORK_KEY"] == self.network_key
             and data["NODE_DATA"]["UUID"] not in self.peers
         ):  
+            self.add_peer(data["NODE_DATA"])
             network_key = data["NETWORK_KEY"]
             file_meta_data = self.repo.get_files()
             node_meta_data = self.get_node_meta_data()
@@ -162,7 +164,7 @@ class Node:
     def request_file(self, data):
         node_id = data["NODE"]
         data = {
-            "TYPE": "FETCH_FILE",
+            "TYPE": "REQUEST_FILE",
             "DATA": {
                 "IP": self.peers[node_id]["IP"],
                 "SERVER_PORT": self.peers[node_id]["SERVER_PORT"],
