@@ -435,15 +435,18 @@ class Server:
         connection.close()
 
     def recv_file(self, connection, request):
-        meta_data = request["DATA"]["FILE_DATA"]["META_DATA"]
-        file_id = request["DATA"]["FILE_DATA"]["FILE"]
+        try:
+            meta_data = request["DATA"]["FILE_DATA"]["META_DATA"]
+            file_id = request["DATA"]["FILE_DATA"]["FILE"]
 
-        file_buffer = data_transmitters.receive_file(connection, meta_data)
-        data = {
-            "META_DATA": {"META_DATA": meta_data, "FILE": file_id},
-            "FILE_CONTENT": file_buffer,
-        }
-        self.node.handle_file_add(data)
+            file_buffer = data_transmitters.receive_file(connection, meta_data)
+            data = {
+                "META_DATA": {"META_DATA": meta_data, "FILE": file_id},
+                "FILE_CONTENT": file_buffer,
+            }
+            self.node.handle_file_add(data)
+        except:
+            print("Failed to get file")
 
     def serve_file(self, connection):
         pass
