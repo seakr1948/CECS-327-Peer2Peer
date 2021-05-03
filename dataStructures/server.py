@@ -71,6 +71,7 @@ class Server:
             }
             self.request_buffer.put(new_request)
         except:
+            traceback.print_exc()
             print("Failed to get file")
 
     def serve_file(self, connection):
