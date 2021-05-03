@@ -117,7 +117,7 @@ class Node:
         while True:
             update = self.watcher.event_queue.get(block=True)
             parsed_update = self.watcher_parser(update)
-            if not parsed_update == None and hasattr(self.UPDATES, parsed_update["EVENT"]):
+            if not parsed_update == None and parsed_update["EVENT"] in self.UPDATES:
                 self.UPDATES[parsed_update["EVENT"]](parsed_update)
 
     def request_network_join(self, ip, port, network_key):
