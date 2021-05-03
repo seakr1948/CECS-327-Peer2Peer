@@ -153,46 +153,7 @@ class Repo:
             list_to.append(str(key))
         return list_to
 
-    def update(self, event, file = None, uuid = None, meta = None):
-        self.watcher.stop_Watching() #stop the watcher so we don't loop updates
-        adjusted_path_src = "." + event["PATH_SRC"][event["PATH_SRC"].find(self.folder_relative_path[1:]):]
-        if event.PATH_DEST != "":
-            adjusted_path_dest = "." + event["PATH_DEST"][event["PATH_DEST"].find(self.folder_relative_path[1:]):]
-
-        event_type = event["EVENT_TYPE"]
-        #which event will determine next steps
-        if event_type == "deleted": 
-            self.deletion(event, adjusted_path_src)
-        elif event_type == "created":
-            self.creation(event, file, uuid, meta)
-        elif event_type == "modified": 
-            self.deletion(event, adjusted_path_src)
-            self.creation(adjusted_path_src, file, uuid, meta)
-        elif event_type == "moved":
-            self.rename(adjusted_path_src, adjusted_path_dest)
-        
-        self.watcher.start_Watching() #start watching for file changes again
-
-    #rename event
-    def rename(self, src, dest):
-        os.rename(src, dest)
-
-    #deletion event
-    def deletion(event, src):
-        if event["IS_DIRECTORY"]:
-            os.rmdir(src)
-        else:
-            os.remove(src)
-
-    #creation event
-    def creation(self, src, file, uuid, meta):
-        #create the new file
-        file_path = src
-        file_name = os.path.basename(file_path)
-        with open(file_path, 'w') as f:
-            pass
-
+    def delete(self, uuid):
         self.load_meta_data()
-        self.update_file_meta_data(uuid, meta)
-
-        self.write_file_content(path, file)  
+        self.meta_data.pop(uuid)
+        self.write_to_meta_data_file(self.meta_data)
