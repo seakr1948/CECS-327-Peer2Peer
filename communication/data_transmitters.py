@@ -57,7 +57,6 @@ def receive_file(connection: socket.socket, meta_data):
     connection.send('1'.encode('utf-8'))
     file_size = meta_data["file_size"]
     file = recv_all(connection, file_size)
-    print(file + " <----STREAM")
     print(file.decode() + "<---DECODE")
     file_buffer = BytesIO(file.write(file))
     
