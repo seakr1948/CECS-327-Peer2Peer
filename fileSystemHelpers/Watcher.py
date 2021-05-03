@@ -22,11 +22,18 @@ class Watcher:
         self.my_observer.schedule(
             self.event_handler, self.complete_path, recursive=True
         )
+        self.my_observer.start()
+        self.watch_for_updates = False
+
 
     def start_Watching(self):
-        self.my_observer.start()
+        self.watch_for_updates = True
+
 
     def stop_Watching(self):
+        self.watch_for_updates = False
+
+    def end_Observer(self):
         self.my_observer.stop()
         self.my_observer.join()
 
@@ -43,32 +50,33 @@ class Watcher:
         self.en_que(event)
 
     def en_que(self, event):
-        if os.path.isdir(event.src_path) and event.event_type == "modified":
-            pass
-        else:
-            dest = ""
-            if event.event_type == "moved":
-                dest = event.dest_path
-            self.event_queue.put(
-                dict(
-                    {
-                        "PATH": event.src_path,
-                        "PATH_DEST": dest,
-                        "IS_DIRECTORY": event.is_directory,
-                        "EVENT_TYPE": event.event_type,
-                    }
+        if self.watch_for_updates:
+            if os.path.isdir(event.src_path) and event.event_type == "modified":
+                pass
+            else:
+                dest = ""
+                if event.event_type == "moved":
+                    dest = event.dest_path
+                self.event_queue.put(
+                    dict(
+                        {
+                            "PATH_SRC": event.src_path,
+                            "PATH_DEST": dest,
+                            "IS_DIRECTORY": event.is_directory,
+                            "EVENT_TYPE": event.event_type,
+                        }
+                    )
                 )
-            )
-            print(
-                dict(
-                    {
-                        "PATH_SRC": event.src_path,
-                        "PATH_DEST": dest,
-                        "IS_DIRECTORY": event.is_directory,
-                        "EVENT_TYPE": event.event_type,
-                    }
+                print(
+                    dict(
+                        {
+                            "PATH_SRC": event.src_path,
+                            "PATH_DEST": dest,
+                            "IS_DIRECTORY": event.is_directory,
+                            "EVENT_TYPE": event.event_type,
+                        }
+                    )
                 )
-            )
 
 
 if __name__ == "__main__":
