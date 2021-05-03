@@ -109,7 +109,7 @@ class Node:
         data = {
             "IP": ip,
             "SERVER_PORT": port,
-            "REQUEST": build_join_request(network_key, self.repo.meta_data, self.get_node_meta_data()),
+            "DATA": build_join_request(network_key, self.repo.meta_data, self.get_node_meta_data()),
         }
         self.client.send_request(data)
 
