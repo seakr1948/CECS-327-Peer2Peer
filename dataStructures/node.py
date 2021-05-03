@@ -164,6 +164,11 @@ class Node:
 
         self.node_data_handler.add_file(file_id, file_data, file_content_bytes)
 
+    def broadcast_delete(self, data):
+        pass
+
+    def handle_delete_request(self, data):
+        pass
 
 class DataHandler:
     def __init__(self, node: Node):
