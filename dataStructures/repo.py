@@ -161,14 +161,14 @@ class Repo:
         event_type = event["EVENT_TYPE"]
         #which event will determine next steps
         if event_type == "deleted": 
-            deletion(event, adjusted_path_src)
+            self.deletion(event, adjusted_path_src)
         elif event_type == "created":
-            creation(event, file, uuid, meta)
+            self.creation(event, file, uuid, meta)
         elif event_type == "modified": 
-            deletion(event, adjusted_path_src)
-            creation(adjusted_path_src, file, uuid, meta)
+            self.deletion(event, adjusted_path_src)
+            self.creation(adjusted_path_src, file, uuid, meta)
         elif event_type == "moved":
-            rename(adjusted_path_src, adjusted_path_dest)
+            self.rename(adjusted_path_src, adjusted_path_dest)
         
         self.watcher.start_Watching() #start watching for file changes again
 
