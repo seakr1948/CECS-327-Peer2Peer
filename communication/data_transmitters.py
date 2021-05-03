@@ -50,9 +50,11 @@ def send_json(connection: socket.socket, message):
 
 def send_file(connection: socket.socket, file: BytesIO, header):
     send_json(connection, header)
+    connection.recv(1)
     connection.sendfile(file)
 
 def receive_file(connection: socket.socket, meta_data):
+    connection.send('1'.encode('utf-8'))
     file_size = meta_data["file_size"]
     file = recv_all(connection, file_size)
     print(file + " <----STREAM")
