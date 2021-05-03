@@ -269,7 +269,7 @@ class Node:
         self.repo.delete(data["FILE"])
         self.repo.add_file(
             data["FILE"],
-            data["META_dATA"],
+            data["META_DATA"],
             data["FILE_CONTENT"]
         )
     
