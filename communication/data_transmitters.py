@@ -51,7 +51,7 @@ def send_json(connection: socket.socket, message):
 def send_file(connection: socket.socket, file: BytesIO, header):
     send_json(connection, header)
     print(connection.recv(1).decode())
-    connection.sendall(file.read())
+    connection.send(file.read())
 
 def receive_file(connection: socket.socket, meta_data):
     connection.send('1'.encode('utf-8'))
