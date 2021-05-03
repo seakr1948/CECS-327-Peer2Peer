@@ -132,8 +132,8 @@ class Node:
             and data["NODE_DATA"]["UUID"] not in self.peers
         ):  
             network_key = data["NETWORK_KEY"]
-            file_meta_data = data["FILES"]
-            node_meta_data = data["NODE_DATA"]
+            file_meta_data = self.repo.get_files()
+            node_meta_data = self.get_node_meta_data()
             work = build_join_work(network_key, file_meta_data, node_meta_data)
             print(work)
             self.add_work_to_worker(work)

@@ -16,8 +16,8 @@ class Client:
         port
         request : must be packaged
         """
-        ip = data["IP"]
-        port = data["SERVER_PORT"]
+        ip = data["NODE_DATA"]["IP"]
+        port = data["NODE_DATA"]["SERVER_PORT"]
         request = data["REQUEST"]
         try:
             # Try to send join request

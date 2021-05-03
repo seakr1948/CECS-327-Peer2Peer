@@ -142,3 +142,7 @@ class Repo:
 
         for key in updated_meta.keys():
             file_meta_data.update({key: updated_meta[key]})
+    
+    def get_files(self):
+        self.load_meta_data()
+        return self.meta_data.keys()
