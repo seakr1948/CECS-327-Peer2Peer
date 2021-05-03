@@ -105,8 +105,9 @@ class Node:
             print("here")
             try:
                 work = self.work_buffer.get(block=True)
-                self.WORK[work["TYPE"]](work["DATA"])
-                print("WORK: " + str(work))
+                if not work == None:
+                    self.WORK[work["TYPE"]](work["DATA"])
+                    print("WORK: " + str(work))
             except:
                 traceback.print_exc()
                 print("WORK FAILED")
