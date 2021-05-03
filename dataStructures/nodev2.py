@@ -177,11 +177,13 @@ class Node:
     def handle_file_request(self, data):
         file_id = data["FILE"]
         node_id = data["NODE"]
+        ip = data["PORT"]
+        port = data["SERVER_PORT"]
 
         file_meta_data = self.repo.fetch_file_data(file_id)
         file_buffer = self.repo.fetch_file(file_id)
 
-        work = build_serve_file_work(file_id, file_meta_data, file_buffer, node_id)
+        work = build_serve_file_work(file_id, file_meta_data, file_buffer, node_id, ip, port)
 
         self.add_work_to_worker(work)
 
