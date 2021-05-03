@@ -225,6 +225,7 @@ class Node:
             data["SIGS"].append(str(self.uuid))
             
             # Delete repo file HERE
+            
             for peer in self.peers:
                 self.client.send_request({
                     "TYPE": "DELETE",
