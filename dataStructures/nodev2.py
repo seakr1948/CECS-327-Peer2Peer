@@ -87,7 +87,7 @@ class Node:
                 pass
             
             try:
-                request = self.server.request_buffer.get()
+                work = self.server.request_buffer.get()
                 self.WORK[work["TYPE"]](work["DATA"])
                 print("WORK: " + str(work))
             except Empty:
