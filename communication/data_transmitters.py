@@ -3,7 +3,7 @@ import socket
 import json
 import traceback
 
-MESSAGE_LENGTH = 2048
+MESSAGE_LENGTH = 1024
 
 
 def pad_message(message: str):
@@ -29,7 +29,13 @@ def receive_json(connection: socket.socket):
         return None
 
 def recv_all(connection: socket.socket, size):
-    return connection.recv(size, socket.MSG_WAITALL)
+    data = bytearray()
+    while len(data) < size:
+        packet = connection.recv(size - len(data))
+        if not packet:
+            return None
+        data.extend(packet)
+    return data
 
 
 def send_json(connection: socket.socket, message):
@@ -55,7 +61,7 @@ def receive_file(connection: socket.socket, meta_data):
     print(file.decode() + "<---DECODE")
     file_buffer = BytesIO(file.write(file))
     
-    return meta_data, file_buffer
+    return file_buffer
     
 
 
