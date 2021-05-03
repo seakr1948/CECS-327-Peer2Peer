@@ -84,21 +84,11 @@ class Node:
         while True:
             print("here")
             try:
-                work = self.work_buffer.get()
+                work = self.work_buffer.get(block=True)
                 self.WORK[work["TYPE"]](work["DATA"])
                 print("WORK: " + str(work))
-            except Empty:
-                print("EMPTY")
-                pass
-            
-            try:
-                work = self.server.request_buffer.get()
-                print("WORK: " + str(work))
-                self.WORK[work["TYPE"]](work["DATA"])
-                print("WORK: " + str(work))
-            except Empty:
-                print("EMPTY")
-                pass
+            except:
+                print("WORK FAILED")
     
     def push_request_buffer_to_work(self):
         while True:
@@ -143,6 +133,7 @@ class Node:
             file_meta_data = data["FILES"]
             node_meta_data = data["NODE_DATA"]
             work = build_join_work(network_key, file_meta_data, node_meta_data)
+            print(work)
             self.add_work_to_worker(work)
             self.handle_network_accept(data)
     
