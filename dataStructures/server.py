@@ -31,7 +31,7 @@ class Server:
         while True:
             # Grab the request
             request = receive_json(connection)
-            # self.echo_request(request)
+            self.echo_request(request)
 
             recv_flag = False
             try:
@@ -51,7 +51,6 @@ class Server:
                 print("NON RECV REQUEST")
                 self.request_buffer.put(request)
             # traceback.print_exc()
-            print("REQUEST not set up yet")
 
         connection.close()
 
