@@ -65,6 +65,7 @@ class Node:
         while True:
             try:
                 work = self.work_buffer.get(block=True)
+                print("WORK")
                 self.WORK[work["TYPE"]](work["DATA"])
             except:
                 #self.work_buffer.put(work)
