@@ -2,6 +2,8 @@
 def build_join_request(network_key, file_meta_data, node_meta_data):
     return {
         "TYPE": "JOIN",
+        "IP": node_meta_data["IP"],
+        "SERVER_PORT": node_meta_data["SERVER_PORT"],
         "DATA": {
             "NETWORK_KEY": network_key,
             "FILES": [file_uuid for file_uuid in file_meta_data],
