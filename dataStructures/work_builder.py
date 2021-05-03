@@ -33,7 +33,7 @@ def build_file_request(ip, port, file_id, node_id):
         },
     }
 
-def build_serve_file_work(file_id, file_meta_data, file_buffer, node_id, ip, port, type_):
+def build_serve_file_work(file_id, file_meta_data, file_buffer, node_id, ip, port, type_, SIGS=None):
     return {
         "TYPE": "SERVE_FILE",
         "DATA": {
@@ -42,7 +42,8 @@ def build_serve_file_work(file_id, file_meta_data, file_buffer, node_id, ip, por
             "META_DATA": {"FILE": file_id, "META_DATA": file_meta_data},
             "FILE_CONTENT": file_buffer,
             "NODE": node_id,
-            "F_TYPE": type_
+            "F_TYPE": type_,
+            "SIGS": SIGS
         },
     }
 

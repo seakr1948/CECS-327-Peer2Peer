@@ -239,13 +239,22 @@ class Node:
     
     def send_file_update(self, data):
         file_id = data["FILE"]
+        type_ = "UPDATE"
+        Sigs = [str(self.uuid)]
         for peer in self.peers:
             file_meta_data = self.repo.fetch_file_data(file_id)
             file_buffer = self.repo.fetch_file(file_id)
+            node_id = "some_Data"
+            ip = peer["IP"]
+            port = peer["SERVER_PORT"]
 
-            work = build_serve_file_work(file_id, file_meta_data, file_buffer, node_id, ip, port, type_)
+            work = build_serve_file_work(file_id, file_meta_data, file_buffer, node_id, ip, port, type_, Sigs)
 
-            self.client.send_request(request)
+            self.add_work_to_worker(work)
+
+    def handle_incoming_update(self, data):
+        
+        pass
     
     
 
