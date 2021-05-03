@@ -188,7 +188,7 @@ class Node:
         node_id = data["NODE"]
         ip = data["IP"]
         port = data["SERVER_PORT"]
-        type_ = "CREATE"
+        type_ = "ADD"
 
         file_meta_data = self.repo.fetch_file_data(file_id)
         file_buffer = self.repo.fetch_file(file_id)
@@ -198,6 +198,7 @@ class Node:
         self.add_work_to_worker(work)
 
     def handle_incoming_file(self, data):
+        print(data)
         self.INCOMING_MAP[data["F_TYPE"]](data)
 
     def handle_file_add(self, data):

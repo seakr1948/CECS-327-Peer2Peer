@@ -58,16 +58,18 @@ class Server:
         try:
             meta_data = request["DATA"]["FILE_DATA"]["META_DATA"]
             file_id = request["DATA"]["FILE_DATA"]["FILE"]
+            print(request)
 
             file_buffer = receive_file(connection, meta_data)
             data = {
                 "META_DATA": meta_data, 
                 "FILE": file_id,
                 "FILE_CONTENT": file_buffer,
+                "F_TYPE": request["F_TYPE"]
             }
             new_request = {
                 "TYPE": "RECV_FILE",
-                "DATA": data
+                "DATA": data,
             }
             self.request_buffer.put(new_request)
         except:
