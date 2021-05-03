@@ -176,16 +176,14 @@ class DataHandler:
         self.node.peers = {}
 
     def add_ignore_files(self, file_names: list):
-        file_names = [name.strip('\n') for name in file_names]
+        file_names = [name.strip("\n") for name in file_names]
         print(file_names)
         self.node.ignore_file_names.extend(file_names)
 
     def load_ignore_file_names(self):
         try:
-            path_ = path.join(self.node.folder_complete_path, '.ignore')
-            with open(
-               path_
-            ) as file_names:
+            path_ = path.join(self.node.folder_complete_path, ".ignore")
+            with open(path_) as file_names:
                 self.add_ignore_files(file_names.readlines())
         except:
             print("No ignored files")
@@ -357,24 +355,22 @@ class Client:
         file_buffer = data["FILE_CONTENT"]
         file_meta_data = data["META_DATA"]
 
-        header = {"TYPE": "RECV_FILE", 
-                    "DATA": {
-                        "FILE_DATA": file_meta_data,
-                    }}
+        header = {
+            "TYPE": "RECV_FILE",
+            "DATA": {
+                "FILE_DATA": file_meta_data,
+            },
+        }
 
         try:
             # Send join request
-            data_transmitters.send_file(
-                self.client_socket, file_buffer, header
-            )
+            data_transmitters.send_file(self.client_socket, file_buffer, header)
 
         except:
             self.client_socket.connect((ip, port))
 
         # Send join request
-        data_transmitters.send_file(
-            self.client_socket, file_buffer, header
-        )
+        data_transmitters.send_file(self.client_socket, file_buffer, header)
 
         return self.client_socket
 
@@ -414,10 +410,10 @@ class Server:
         while True:
             # Grab the request
             request = data_transmitters.receive_json(connection)
-            #self.echo_request(request)
+            # self.echo_request(request)
 
             recv_flag = False
-            try: 
+            try:
                 # Get the type of request
                 type_of_request = request["TYPE"]
             except:
@@ -433,15 +429,20 @@ class Server:
             if recv_flag == False:
                 self.REQUEST[type_of_request](request["DATA"])
                 print("ran here")
-            #traceback.print_exc()
+            # traceback.print_exc()
             print("REQUEST not set up yet")
-        
+
         connection.close()
 
     def recv_file(self, connection, request):
         meta_data = request["DATA"]["FILE_DATA"]["META_DATA"]
+        file_id = request["DATA"]["FILE_DATA"]["FILE"]
+
         file_buffer = data_transmitters.receive_file(connection, meta_data)
-        data = {"META_DATA": meta_data, "FILE_CONTENT": file_buffer}
+        data = {
+            "META_DATA": {"META_DATA": meta_data, "FILE": file_id},
+            "FILE_CONTENT": file_buffer,
+        }
         self.node.handle_file_add(data)
 
     def serve_file(self, connection):
