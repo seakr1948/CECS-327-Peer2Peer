@@ -1,4 +1,5 @@
 from io import BytesIO
+import os
 import os.path as path
 import json
 import uuid
@@ -152,7 +153,7 @@ class Repo:
             list_to.append(str(key))
         return list_to
 
-    def update(event, file = None, uuid = None, meta = None):
+    def update(self, event, file = None, uuid = None, meta = None):
         self.watcher.stop_Watching() #stop the watcher so we don't loop updates
         adjusted_path_src = "." + event["PATH_SRC"][event["PATH_SRC"].find(self.folder_relative_path[1:]):]
         if event.PATH_DEST != "":
@@ -173,7 +174,7 @@ class Repo:
         self.watcher.start_Watching() #start watching for file changes again
 
     #rename event
-    def rename(src, dest):
+    def rename(self, src, dest):
         os.rename(src, dest)
 
     #deletion event
@@ -184,7 +185,7 @@ class Repo:
             os.remove(src)
 
     #creation event
-    def creation(src, file, uuid, meta):
+    def creation(self, src, file, uuid, meta):
         #create the new file
         file_path = src
         file_name = os.path.basename(file_path)
