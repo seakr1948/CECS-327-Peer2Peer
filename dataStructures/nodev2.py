@@ -59,7 +59,7 @@ class Node:
 
         self.UPDATES = {
             "deleted": self.build_delete_work,
-            "created": self.build_created_work
+            "modified": self.build_created_work
         }
     
     def get_node_meta_data(self):
@@ -119,6 +119,7 @@ class Node:
         while True:
             update = self.watcher.event_queue.get(block=True)
             parsed_update = self.watcher_parser(update)
+            print("PARED_UPDATE" + str(parsed_update))
             if not parsed_update == None and parsed_update["EVENT"] in self.UPDATES:
                 self.UPDATES[parsed_update["EVENT"]](parsed_update)
 
@@ -271,14 +272,12 @@ class Node:
     def watcher_parser(self, event_token):
         self.repo.load_meta_data()
         meta_file = self.repo.meta_data
-        print(event_token)
         rel_path = path.join('./',path.relpath(event_token["PATH_SRC"], self.complete_path))
-        print(rel_path)
 
         event = event_token["EVENT_TYPE"]
         for key in meta_file.keys():
-            print(meta_file[key]["relative_path"])
-            if event == "created":
+            print(rel_path)
+            if event == "modified":
                 self.repo.file_created(rel_path)
             if meta_file[key]["relative_path"] == rel_path:
                 uuid = key
@@ -310,7 +309,7 @@ class Node:
             port = self.peers[peer]["SERVER_PORT"]
 
             work = build_serve_file_work(file_id, file_meta_data, file_buffer, node_id, ip, port, type_, Sigs)
-
+            print(work)
             self.add_work_to_worker(work)
 
 
