@@ -130,8 +130,10 @@ class Repo:
         return copy_of_file
 
     def add_file(self, file_uuid, meta_data, file_content):
+        self.watcher.stop_Watching()
         self.update_file_meta_data(file_uuid, meta_data)
         self.write_file_content(meta_data["relative_path"], file_content)
+        self.watcher.start_Watching()
 
     def write_file_content(self, relative_path, file_content: BytesIO):
         file = open(path.join(self.folder_complete_path, relative_path), "wb")
@@ -155,7 +157,24 @@ class Repo:
 
     def delete(self, uuid):
         self.load_meta_data()
+        self.watcher.stop_Watching()
         path_ = os.path.join(self.folder_complete_path, self.meta_data[uuid]["relative_path"])
         os.remove(os.path.abspath(path_))
+        self.watcher.start_Watching()
         self.meta_data.pop(uuid)
+        self.write_to_meta_data_file(self.meta_data)
+    
+    def file_created(self, rel_path):
+        file_abs_path = os.path.join(self.folder_complete_path, rel_path)
+
+        file_object = File(
+            self.folder_complete_path, rel_path, self.uuid, self.encoder
+        )
+
+        file_meta = file_object.to_dict()
+
+        self.load_meta_data()
+
+        self.meta_data.update(file_meta)
+
         self.write_to_meta_data_file(self.meta_data)

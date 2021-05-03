@@ -49,15 +49,17 @@ class Node:
             "RECV_FILE": self.handle_incoming_file,
             "JOIN": self.handle_join_request,
             "SEND_DELETE": self.send_delete,
-            "DELETE": self.recv_delete
+            "DELETE": self.recv_delete,
         }
 
         self.INCOMING_MAP = {
             "ADD": self.handle_file_add,
+            "UPDATE": self.handle_incoming_update
         }
 
         self.UPDATES = {
-            "deleted": self.build_delete_work
+            "deleted": self.build_delete_work,
+            "created": self.build_created_work
         }
     
     def get_node_meta_data(self):
@@ -259,8 +261,12 @@ class Node:
             self.add_work_to_worker(work)
 
     def handle_incoming_update(self, data):
-        
-        pass
+        self.repo.delete(data["FILE"])
+        self.repo.add_file(
+            data["FILE"],
+            data["META_dATA"],
+            data["FILE_CONTENT"]
+        )
     
     def watcher_parser(self, event_token):
         self.repo.load_meta_data()
@@ -272,6 +278,8 @@ class Node:
         event = event_token["EVENT_TYPE"]
         for key in meta_file.keys():
             print(meta_file[key]["relative_path"])
+            if event == "created":
+                self.repo.file_created(rel_path)
             if meta_file[key]["relative_path"] == rel_path:
                 uuid = key
                 return {"FILE": str(uuid), "EVENT": event }
@@ -289,6 +297,21 @@ class Node:
         }
 
         self.add_work_to_worker(work)
+    
+    def build_created_work(self, data):
+        file_id = data["FILE"]
+        type_ = "ADD"
+        Sigs = [str(self.uuid)]
+        for peer in self.peers:
+            file_meta_data = self.repo.fetch_file_data(file_id)
+            file_buffer = self.repo.fetch_file(file_id)
+            node_id = "some_Data"
+            ip = self.peers[peer]["IP"]
+            port = self.peers[peer]["SERVER_PORT"]
+
+            work = build_serve_file_work(file_id, file_meta_data, file_buffer, node_id, ip, port, type_, Sigs)
+
+            self.add_work_to_worker(work)
 
 
 
