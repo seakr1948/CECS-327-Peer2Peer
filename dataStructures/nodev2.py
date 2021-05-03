@@ -164,7 +164,7 @@ class Node:
     def request_file(self, data):
         node_id = data["NODE"]
         data = {
-            "TYPE": "REQUEST_FILE",
+            "TYPE": "FILE_REQUEST",
             "DATA": {
                 "IP": self.peers[node_id]["IP"],
                 "SERVER_PORT": self.peers[node_id]["SERVER_PORT"],
