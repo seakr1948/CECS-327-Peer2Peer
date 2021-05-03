@@ -231,6 +231,7 @@ class Node:
             data["SIGS"].append(str(self.uuid))
             
             self.repo.delete(data["FILE"])
+            print("GOT HERE AT DELETE")
             for peer in self.peers:
                 self.client.send_request({
                     "TYPE": "DELETE",

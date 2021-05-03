@@ -155,5 +155,7 @@ class Repo:
 
     def delete(self, uuid):
         self.load_meta_data()
+        path_ = self.meta_data[uuid]["relative_path"]
+        os.remove(os.path.abspath(path_))
         self.meta_data.pop(uuid)
         self.write_to_meta_data_file(self.meta_data)
