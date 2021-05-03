@@ -145,13 +145,13 @@ class Node:
                     "TYPE": "JOIN",
                     "DATA": {
                         "IP": data["NODE_DATA"]["IP"],
-                        "PORT": data["NODE_DATA"]["SERVER_PORT"],
+                        "SERVER_PORT": data["NODE_DATA"]["SERVER_PORT"],
                         "FILES": list(self.repo.get_files()),
-                        "NODE_DATA": self.get_node_meta_data()
+                        "NODE_DATA": self.get_node_meta_data(),
+                        "NETWORK_KEY": self.network_key
                     }
                 }
             }
-            print(work)
             self.add_work_to_worker(work)
             self.handle_network_accept(data)
     
