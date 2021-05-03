@@ -39,7 +39,7 @@ class Server:
                 type_of_request = request["TYPE"]
             except:
                 print("Request not found")
-
+            type_of_request = request["TYPE"]
             if type_of_request == "RECV_FILE":
                 self.recv_file(connection, request)
                 recv_flag = True
