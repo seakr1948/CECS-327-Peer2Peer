@@ -53,7 +53,7 @@ class Node:
         }
 
         self.INCOMING_MAP = {
-            "ADD": self.handle_file_add
+            "ADD": self.handle_file_add,
         }
     
     def get_node_meta_data(self):
@@ -236,18 +236,17 @@ class Node:
                     }
                 })
     
-    def update_file(self, data):
+    def send_file_update(self, data):
+        file_id = data["FILE"]
         for peer in self.peers:
-            request = {
-                "TYPE": "UPDATE",
-                "DATA": {
-                    "IP": peer["IP"],
-                    "SERVER_PORT": peer["SERVER_PORT"],
-                    "FILE": data["FILE"],
-                    "SIGS": [str(self.uuid)]
-                },
-            }
+            file_meta_data = self.repo.fetch_file_data(file_id)
+            file_buffer = self.repo.fetch_file(file_id)
+
+            work = build_serve_file_work(file_id, file_meta_data, file_buffer, node_id, ip, port, type_)
+
             self.client.send_request(request)
+    
+    
 
 def start_a_thread(function, args_=()):
     thread = threading.Thread(target=function, args=args_)
