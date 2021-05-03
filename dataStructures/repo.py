@@ -159,10 +159,13 @@ class Repo:
         self.load_meta_data()
         self.watcher.stop_Watching()
         path_ = os.path.join(self.folder_complete_path, self.meta_data[uuid]["relative_path"])
-        os.remove(os.path.abspath(path_))
-        self.watcher.start_Watching()
-        self.meta_data.pop(uuid)
-        self.write_to_meta_data_file(self.meta_data)
+        try: 
+            os.remove(os.path.abspath(path_))
+            self.watcher.start_Watching()
+            self.meta_data.pop(uuid)
+            self.write_to_meta_data_file(self.meta_data)
+        except:
+            print("FILE ALREADY DELTED")
     
     def file_created(self, rel_path):
         file_abs_path = os.path.join(self.folder_complete_path, rel_path)

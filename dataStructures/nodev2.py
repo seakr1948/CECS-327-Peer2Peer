@@ -277,10 +277,11 @@ class Node:
         self.repo.load_meta_data()
         meta_file = self.repo.meta_data
         rel_path = path.join('./',path.relpath(event_token["PATH_SRC"], self.complete_path))
+        if rel_path == './meta.json':
+            return None
 
         event = event_token["EVENT_TYPE"]
         for key in meta_file.keys():
-            print(rel_path)
             if event == "created":
                 file_id = self.repo.file_created(rel_path)
                 return {"FILE": file_id, "EVENT": "created"}
