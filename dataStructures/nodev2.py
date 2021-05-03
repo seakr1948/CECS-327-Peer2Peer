@@ -162,12 +162,12 @@ class Node:
     def request_file(self, data):
         node_id = data["NODE"]
         data = {
-            "IP": self.peers[node_id]["IP"],
-            "SERVER_PORT": self.peers[node_id]["SERVER_PORT"],
-            "REQUEST": {
-                "TYPE": "FETCH_FILE",
-                "DATA": {"FILE": data["FILE"], "NODE": str(self.uuid)},
-            },
+            "TYPE": "FETCH_FILE",
+            "DATA": {
+                "IP": self.peers[node_id]["IP"],
+                "SERVER_PORT": self.peers[node_id]["SERVER_PORT"],
+                "FILE": data["FILE"], 
+                "NODE": str(self.uuid)},
         }
 
         self.client.send_request(data)
