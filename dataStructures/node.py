@@ -429,6 +429,7 @@ class Server:
             # Pass the data in the request to that function
             try:
                 self.REQUEST[type_of_request](request["DATA"])
+                print("ran here")
             except:
                 traceback.print_exc()
                 print("REQUEST not set up yet")
