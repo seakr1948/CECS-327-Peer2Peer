@@ -61,7 +61,8 @@ class Node:
 
         self.UPDATES = {
             "deleted": self.build_delete_work,
-            "created": self.build_created_work
+            "created": self.build_created_work,
+            "moved": self.build_moved_modified_work
         }
     
     def get_node_meta_data(self):
