@@ -218,8 +218,8 @@ class Node:
             request = {
                 "TYPE": "DELETE",
                 "DATA": {
-                    "IP": peer["IP"],
-                    "SERVER_PORT": peer["SERVER_PORT"],
+                    "IP": self.peers[peer]["IP"],
+                    "SERVER_PORT": self.peers[peer]["SERVER_PORT"],
                     "FILE": data["FILE"],
                     "SIGS": [str(self.uuid)]
                 },
@@ -235,8 +235,8 @@ class Node:
                 self.client.send_request({
                     "TYPE": "DELETE",
                     "DATA": {
-                        "IP": peer["IP"],
-                        "SERVER_PORT": peer["SERVER_PORT"],
+                        "IP": self.peers[peer]["IP"],
+                        "SERVER_PORT": self.peers[peer]["SERVER_PORT"],
                         "FILE": data["FILE"],
                         "SIGS": data["SIGS"]
                     }
@@ -250,8 +250,8 @@ class Node:
             file_meta_data = self.repo.fetch_file_data(file_id)
             file_buffer = self.repo.fetch_file(file_id)
             node_id = "some_Data"
-            ip = peer["IP"]
-            port = peer["SERVER_PORT"]
+            ip = self.peers[peer]["IP"]
+            port = self.peers[peer]["SERVER_PORT"]
 
             work = build_serve_file_work(file_id, file_meta_data, file_buffer, node_id, ip, port, type_, Sigs)
 
