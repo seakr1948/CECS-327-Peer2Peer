@@ -65,7 +65,7 @@ class Server:
                 "META_DATA": meta_data, 
                 "FILE": file_id,
                 "FILE_CONTENT": file_buffer,
-                "F_TYPE": request["F_TYPE"]
+                "F_TYPE": request["DATA"]["F_TYPE"]
             }
             new_request = {
                 "TYPE": "RECV_FILE",
