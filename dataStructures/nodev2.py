@@ -117,7 +117,8 @@ class Node:
         while True:
             update = self.watcher.event_queue.get(block=True)
             parsed_update = self.watcher_parser(update)
-            self.UPDATES[parsed_update["EVENT"]](parsed_update)
+            if not parsed_update == None:
+                self.UPDATES[parsed_update["EVENT"]](parsed_update)
 
     def request_network_join(self, ip, port, network_key):
         self.repo.load_meta_data()
