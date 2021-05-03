@@ -107,9 +107,14 @@ class Node:
     def request_network_join(self, ip, port, network_key):
         self.repo.load_meta_data()
         data = {
+            "TYPE": "JOIN",
             "IP": ip,
             "SERVER_PORT": port,
-            "DATA": build_join_request(network_key, self.repo.meta_data, self.get_node_meta_data()),
+            "DATA": {
+                "NETWORK_KEY": self.network_key,
+                "FILES": self.repo.get_files(),
+                "NODE_DATA": self.get_node_meta_data()
+            },
         }
         self.client.send_request(data)
 
