@@ -75,10 +75,14 @@ class Node:
     
     def start_server(self):
         self.server.set_up_request_socket()
+    
+    def start_request_transport(self):
+        start_a_thread(self.push_request_buffer_to_work)
 
     def wait_for_work(self):
         # While true block for work
         while True:
+            print("here")
             try:
                 work = self.work_buffer.get()
                 self.WORK[work["TYPE"]](work["DATA"])
@@ -95,6 +99,11 @@ class Node:
             except Empty:
                 print("EMPTY")
                 pass
+    
+    def push_request_buffer_to_work(self):
+        while True:
+            request = self.server.request_buffer.get(block=True)
+            self.work_buffer.put(request)
 
     def wait_for_file_update(self):
         # While true block for file updates
