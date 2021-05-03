@@ -21,7 +21,6 @@ def receive_json(connection: socket.socket):
     try:
         data_recieved = recv_all(connection, MESSAGE_LENGTH)
         data = data_recieved.decode('utf-8')
-        print(data)
         unpadded_message = unpad_message(data)
         print(unpadded_message + "<- \n\n")
         return dict(json.loads(unpadded_message))
