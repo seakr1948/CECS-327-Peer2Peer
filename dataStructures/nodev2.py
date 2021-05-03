@@ -47,16 +47,16 @@ class Node:
     
     def get_node_meta_data(self):
         return {
-            "UUID": str(self.node.uuid),
-            "IP": self.node.ip,
-            "SERVER_PORT": self.node.server_port,
+            "UUID": str(self.uuid),
+            "IP": self.ip,
+            "SERVER_PORT": self.server_port,
         }
 
     def add_peer(self, peer_data):
-        if hasattr(self.node, "peers"):
-            self.node.peers = {}
+        if hasattr(self, "peers"):
+            self.peers = {}
 
-        self.node.peers.update(
+        self.peers.update(
             {
                 peer_data["UUID"]: {
                     "IP": peer_data["IP"],
@@ -65,7 +65,7 @@ class Node:
             }
         )
 
-        print("PEERS: " + str(self.node.peers.keys()))
+        print("PEERS: " + str(self.peers.keys()))
 
     def start_worker(self):
         start_a_thread(self.wait_for_work)
@@ -100,6 +100,7 @@ class Node:
             print(update)
 
     def request_network_join(self, ip, port, network_key):
+        self.repo.load_meta_data()
         data = {
             "IP": ip,
             "SERVER_PORT": port,
