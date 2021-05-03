@@ -67,7 +67,7 @@ class Node:
                 work = self.work_buffer.get(block=True)
                 self.WORK[work["TYPE"]](work["DATA"])
             except:
-                traceback.print_exc()
+                self.work_buffer.put(work)
 
     def wait_for_file_update(self):
         # While true block for file updates
