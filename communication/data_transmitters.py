@@ -23,7 +23,6 @@ def receive_json(connection: socket.socket):
         data_recieved = recv_all(connection, MESSAGE_LENGTH)
         data = data_recieved.decode('utf-8')
         unpadded_message = unpad_message(data)
-        print(unpadded_message + "<- \n\n")
         return dict(json.loads(unpadded_message))
     except:
         return None
@@ -50,14 +49,14 @@ def send_json(connection: socket.socket, message):
 
 def send_file(connection: socket.socket, file: BytesIO, header):
     send_json(connection, header)
-    print(connection.recv(1).decode())
+    connection.recv(1).decode()
     connection.send(file.read())
 
 def receive_file(connection: socket.socket, meta_data):
     connection.send('1'.encode('utf-8'))
     file_size = meta_data["file_size"]
     file = recv_all(connection, file_size)
-    print(file.decode() + "<---DECODE")
+    file.decode()
     file_buffer = BytesIO(file)
     
     return file_buffer

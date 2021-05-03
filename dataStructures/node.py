@@ -65,7 +65,7 @@ class Node:
         while True:
             try:
                 work = self.work_buffer.get(block=True)
-                print("WORK")
+                print("WORK: " + str(work))
                 self.WORK[work["TYPE"]](work["DATA"])
             except:
                 #self.work_buffer.put(work)
@@ -79,7 +79,7 @@ class Node:
 
     def add_uuid_to_worker(self, file_uuids, node_uuid):
         for uuid in file_uuids:
-            print("Added file")
+            print("Added file" + uuid)
             self.add_work_to_worker(
                 {"TYPE": "FETCH_FILE", "DATA": {"FILE": uuid, "NODE": node_uuid}}
             )
