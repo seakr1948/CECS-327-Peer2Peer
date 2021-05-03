@@ -281,11 +281,11 @@ class Node:
         for key in meta_file.keys():
             print(rel_path)
             if event == "created":
-                rel_path = path.join('./',path.relpath(event_token["PATH_DEST"], self.complete_path))
                 file_id = self.repo.file_created(rel_path)
                 return {"FILE": file_id, "EVENT": "created"}
             if meta_file[key]["relative_path"] == rel_path:
                 if event == "moved":
+                    rel_path = path.join('./',path.relpath(event_token["PATH_DEST"], self.complete_path))
                     self.repo.re_create_meta(rel_path, str(key))
                 uuid = key
                 return {"FILE": str(uuid), "EVENT": event }
