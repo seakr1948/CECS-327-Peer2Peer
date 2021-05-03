@@ -272,7 +272,7 @@ class Node:
         self.repo.load_meta_data()
         meta_file = self.repo.meta_data
         print(event_token)
-        rel_path = path.join('./',path.relpath(event_token["PATH"], self.complete_path))
+        rel_path = path.join('./',path.relpath(event_token["PATH_SRC"], self.complete_path))
         print(rel_path)
 
         event = event_token["EVENT_TYPE"]
