@@ -178,3 +178,5 @@ class Repo:
         self.meta_data.update(file_meta)
 
         self.write_to_meta_data_file(self.meta_data)
+
+        return str(file_object.file_uuid)

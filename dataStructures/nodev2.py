@@ -59,7 +59,7 @@ class Node:
 
         self.UPDATES = {
             "deleted": self.build_delete_work,
-            "modified": self.build_created_work
+            "created": self.build_created_work
         }
     
     def get_node_meta_data(self):
@@ -277,8 +277,9 @@ class Node:
         event = event_token["EVENT_TYPE"]
         for key in meta_file.keys():
             print(rel_path)
-            if event == "modified":
-                self.repo.file_created(rel_path)
+            if event == "created":
+                file_id = self.repo.file_created(rel_path)
+                return {"FILE": file_id, "EVENT": "created"}
             if meta_file[key]["relative_path"] == rel_path:
                 uuid = key
                 return {"FILE": str(uuid), "EVENT": event }
