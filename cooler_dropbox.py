@@ -1,6 +1,6 @@
 import argparse
 import socket
-import dataStructures.node as node
+import dataStructures.nodev2 as node
 
 
 def join_network(node: node.Node):
@@ -35,16 +35,16 @@ if __name__ == "__main__":
     node = node.Node(relative_path, ip, server_port_number, client_port_number)
     print(node.server_port)
     print(node.ip)
-    node.node_data_handler.load_ignore_file_names()
-    node.server.start_server()
+    node.repo.load_ignore_file_names()
+    node.start_server()
     node.start_worker()
+    node.start_watcher()
+    node.start_request_transport()
 
     if args.load:
-        node.node_data_handler.load_meta_data()
+        node.repo.load_meta_data()
     else:
-        node.node_data_handler.init_meta_file()
+        node.repo.init_meta_file()
 
-    if args.init_network:
-        node.node_data_handler.init_network()
-    else:
+    if not args.init_network:
         join_network(node)
