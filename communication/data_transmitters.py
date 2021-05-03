@@ -2,6 +2,7 @@ from io import BytesIO, FileIO
 import socket
 import json
 import traceback
+from typing import BinaryIO
 
 MESSAGE_LENGTH = 1024
 
@@ -49,11 +50,9 @@ def send_json(connection: socket.socket, message):
 
 def send_file(connection: socket.socket, file: BytesIO, header):
     send_json(connection, header)
-
-    connection.sendall(file.read(header["DATA"]["FILE_DATA"]["META_DATA"]["file_size"]))
+    connection.sendfile(BinaryIO(file))
 
 def receive_file(connection: socket.socket, meta_data):
-
     file_size = meta_data["file_size"]
     file = recv_all(connection, file_size)
     print(file + " <----STREAM")
