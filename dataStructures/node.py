@@ -344,9 +344,8 @@ class Client:
 
         except:
             self.client_socket.connect((ip, port))
-
-        # Send join request
-        data_transmitters.send_json(self.client_socket, request)
+            # Send join request
+            data_transmitters.send_json(self.client_socket, request)
 
         return self.client_socket
 
