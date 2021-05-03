@@ -59,7 +59,7 @@ class Client:
         return {
             "TYPE": "RECV_FILE",
             "DATA": {
-                "META_DATA": file_meta
+                "FILE_DATA": file_meta
             },
         }
     
