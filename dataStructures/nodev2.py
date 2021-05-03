@@ -84,6 +84,7 @@ class Node:
                 self.WORK[work["TYPE"]](work["DATA"])
                 print("WORK: " + str(work))
             except Empty:
+                print("EMPTY")
                 pass
             
             try:
@@ -92,6 +93,7 @@ class Node:
                 self.WORK[work["TYPE"]](work["DATA"])
                 print("WORK: " + str(work))
             except Empty:
+                print("EMPTY")
                 pass
 
     def wait_for_file_update(self):
