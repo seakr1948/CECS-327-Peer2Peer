@@ -46,8 +46,14 @@ class Node:
             "SERVE_FILE": self.client.send_file,
             "FILE_REQUEST": self.handle_file_request,
             "FETCH_FILE": self.request_file,
-            "RECV_FILE": self.handle_file_add,
-            "JOIN": self.handle_join_request
+            "RECV_FILE": self.handle_incoming_file,
+            "JOIN": self.handle_join_request,
+            "SEND_DELETE": self.send_delete,
+            "DELETE": self.recv_delete
+        }
+
+        self.INCOMING_MAP = {
+            "ADD": self.handle_file_add
         }
     
     def get_node_meta_data(self):
@@ -182,20 +188,65 @@ class Node:
         node_id = data["NODE"]
         ip = data["IP"]
         port = data["SERVER_PORT"]
+        type_ = "CREATE"
 
         file_meta_data = self.repo.fetch_file_data(file_id)
         file_buffer = self.repo.fetch_file(file_id)
 
-        work = build_serve_file_work(file_id, file_meta_data, file_buffer, node_id, ip, port)
+        work = build_serve_file_work(file_id, file_meta_data, file_buffer, node_id, ip, port, type_)
 
         self.add_work_to_worker(work)
+
+    def handle_incoming_file(self, data):
+        self.INCOMING_MAP[data["F_TYPE"]](data)
 
     def handle_file_add(self, data):
         file_id = data["FILE"]
         file_data = data["META_DATA"]
         file_content_bytes = data["FILE_CONTENT"]
         self.repo.add_file(file_id, file_data, file_content_bytes)
+
+    def send_delete(self, data):
+        for peer in self.peers:
+            request = {
+                "TYPE": "DELETE",
+                "DATA": {
+                    "IP": peer["IP"],
+                    "SERVER_PORT": peer["SERVER_PORT"],
+                    "FILE": data["FILE"],
+                    "SIGS": [str(self.uuid)]
+                },
+            }
+            self.client.send_request(request)
     
+    def recv_delete(self, data):
+        if str(self.uuid) not in data["SIGS"]:
+            data["SIGS"].append(str(self.uuid))
+            
+            # Delete repo file HERE
+            for peer in self.peers:
+                self.client.send_request({
+                    "TYPE": "DELETE",
+                    "DATA": {
+                        "IP": peer["IP"],
+                        "SERVER_PORT": peer["SERVER_PORT"],
+                        "FILE": data["FILE"],
+                        "SIGS": data["SIGS"]
+                    }
+                })
+    
+    def update_file(self, data):
+        for peer in self.peers:
+            request = {
+                "TYPE": "UPDATE",
+                "DATA": {
+                    "IP": peer["IP"],
+                    "SERVER_PORT": peer["SERVER_PORT"],
+                    "FILE": data["FILE"],
+                    "SIGS": [str(self.uuid)]
+                },
+            }
+            self.client.send_request(request)
 
 def start_a_thread(function, args_=()):
     thread = threading.Thread(target=function, args=args_)

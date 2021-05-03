@@ -43,7 +43,8 @@ class Client:
 
         file_buffer = data["FILE_CONTENT"]
         file_meta_data = data["META_DATA"]
-        request = self.build_recv_file_request(file_meta_data)
+        type_ = data["F_TYPE"]
+        request = self.build_recv_file_request(file_meta_data, type_)
 
         try:
             # Send join request
@@ -55,11 +56,12 @@ class Client:
 
         return self.client_socket
 
-    def build_recv_file_request(self, file_meta):
+    def build_recv_file_request(self, file_meta, type_):
         return {
             "TYPE": "RECV_FILE",
             "DATA": {
-                "FILE_DATA": file_meta
+                "FILE_DATA": file_meta,
+                "F_TYPE": type_
             },
         }
     
