@@ -145,4 +145,8 @@ class Repo:
     
     def get_files(self):
         self.load_meta_data()
-        return self.meta_data.keys()
+        list_keys = self.meta_data.keys()
+        list_to = []
+        for key in list_keys:
+            list_to.append(str(key))
+        return list_to

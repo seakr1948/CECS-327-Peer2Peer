@@ -16,9 +16,10 @@ class Client:
         port
         request : must be packaged
         """
-        ip = data["IP"]
-        port = data["SERVER_PORT"]
+        ip = data["DATA"]["IP"]
+        port = data["DATA"]["SERVER_PORT"]
         request = data
+        print(data)
         try:
             # Try to send join request
             send_json(self.client_socket, request)

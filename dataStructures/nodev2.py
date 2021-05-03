@@ -108,11 +108,11 @@ class Node:
         self.repo.load_meta_data()
         data = {
             "TYPE": "JOIN",
-            "IP": ip,
-            "SERVER_PORT": port,
             "DATA": {
+                "IP": ip,
+                "SERVER_PORT": port,
                 "NETWORK_KEY": self.network_key,
-                "FILES": self.repo.get_files(),
+                "FILES": list(self.repo.get_files()),
                 "NODE_DATA": self.get_node_meta_data()
             },
         }
