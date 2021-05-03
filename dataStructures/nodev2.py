@@ -1,3 +1,4 @@
+from os import path
 from queue import Empty, LifoQueue
 import threading
 import uuid
@@ -5,6 +6,7 @@ from dataStructures.client import Client
 from dataStructures.server import Server
 from dataStructures.repo import Repo
 from dataStructures.work_builder import *
+from fileSystemHelpers.Watcher import Watcher
 import traceback
 
 class Node:
@@ -21,6 +23,7 @@ class Node:
 
         # Standard node data
         self.folder_relative_path = shared_folder_relative_path
+        self.complete_path = path.abspath(shared_folder_relative_path)
         self.ip = ip
         self.server_port = server_port
         self.client_port = client_port
@@ -29,9 +32,9 @@ class Node:
 
         self.uuid = uuid
         self.peers = {}
-
+        self.watcher = Watcher(self.complete_path)
         # Meta data path
-        self.repo = Repo(self.folder_relative_path, self.uuid)
+        self.repo = Repo(self.folder_relative_path, self.uuid, self.watcher)
 
         # Work buffer for the client
         self.work_buffer = LifoQueue()

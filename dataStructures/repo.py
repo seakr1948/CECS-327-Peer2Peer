@@ -8,7 +8,7 @@ from os import walk
 
 class Repo:
     def __init__(self,
-        shared_folder_relative_path: str, uuid: uuid.UUID):
+        shared_folder_relative_path: str, uuid: uuid.UUID, watcher):
 
         # Standard node data
         self.folder_relative_path = shared_folder_relative_path
@@ -18,6 +18,7 @@ class Repo:
         self.encoder = [9, 4, 3, 6]
         self.ignore_file_names = []
         self.uuid = uuid
+        self.watcher = watcher
 
     def add_ignore_files(self, file_names: list):
         file_names = [name.strip("\n") for name in file_names]
