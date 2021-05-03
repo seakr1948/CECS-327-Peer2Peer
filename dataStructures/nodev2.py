@@ -136,6 +136,7 @@ class Node:
             data["NETWORK_KEY"] == self.network_key
             and data["NODE_DATA"]["UUID"] not in self.peers
         ):  
+            self.add_peer(data["NODE_DATA"])
             network_key = data["NETWORK_KEY"]
             file_meta_data = self.repo.get_files()
             node_meta_data = self.get_node_meta_data()
