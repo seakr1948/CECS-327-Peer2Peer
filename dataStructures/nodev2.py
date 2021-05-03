@@ -225,7 +225,6 @@ class Node:
             data["SIGS"].append(str(self.uuid))
             
             # Delete repo file HERE
-            
             for peer in self.peers:
                 self.client.send_request({
                     "TYPE": "DELETE",
@@ -256,7 +255,20 @@ class Node:
         
         pass
     
-    
+    def watcher_dispatcher(self, event_token):
+        repo.load_meta_data()
+        meta_file = repo.meta_data
+
+        for key in meta_file:
+            if key["relative_path"] == event_token["PATH_SRC"]:
+                uuid = key
+        
+        event = event_token["EVENT_TYPE"]
+        
+        return (uuid, event)
+        
+
+
 
 def start_a_thread(function, args_=()):
     thread = threading.Thread(target=function, args=args_)
