@@ -8,6 +8,7 @@ from fileSystemHelpers.Watcher import Watcher
 import logging
 import threading
 import traceback
+from dataStructures.work_builder import *
 
 from os import path, sendfile, waitpid
 from os import walk

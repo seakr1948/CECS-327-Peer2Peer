@@ -1,19 +1,23 @@
 from io import BytesIO
 import os.path as path
 import json
+import uuid
 
 from dataStructures.file import File
 from os import walk
 
 class Repo:
     def __init__(self,
-        shared_folder_relative_path: str):
+        shared_folder_relative_path: str, uuid: uuid.UUID):
 
         # Standard node data
         self.folder_relative_path = shared_folder_relative_path
         self.folder_complete_path = path.abspath(self.folder_relative_path)
+        self.meta_data_path = path.join(self.folder_complete_path, "meta.json")
+        
         self.encoder = [9, 4, 3, 6]
         self.ignore_file_names = []
+        self.uuid = uuid
 
     def add_ignore_files(self, file_names: list):
         file_names = [name.strip("\n") for name in file_names]

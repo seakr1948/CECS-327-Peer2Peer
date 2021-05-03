@@ -62,7 +62,8 @@ class Server:
 
             file_buffer = receive_file(connection, meta_data)
             data = {
-                "META_DATA": {"META_DATA": meta_data, "FILE": file_id},
+                "META_DATA": meta_data, 
+                "FILE": file_id,
                 "FILE_CONTENT": file_buffer,
             }
             new_request = {
