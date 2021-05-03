@@ -50,7 +50,7 @@ def send_json(connection: socket.socket, message):
 
 def send_file(connection: socket.socket, file: BytesIO, header):
     send_json(connection, header)
-    connection.sendfile(BinaryIO(file))
+    connection.sendfile(file)
 
 def receive_file(connection: socket.socket, meta_data):
     file_size = meta_data["file_size"]
